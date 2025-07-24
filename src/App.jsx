@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 
 const SPRITE_RUN = [
-  '/assets/sprite/Run/frame_1.png',
+  '/assets/sprite/Jump/frame_8.png',
   '/assets/sprite/Run/frame_2.png',
   '/assets/sprite/Run/frame_3.png',
   '/assets/sprite/Run/frame_4.png',
@@ -21,7 +21,7 @@ const SPRITE_JUMP = [
 const GAME_WIDTH = 740;
 const GAME_HEIGHT = 367;
 const GROUND_Y = 300;
-const GRAVITY = 0.5;
+const GRAVITY = 0.4;
 const JUMP_VELOCITY = -8;
 const MOVE_SPEED = 1.7;
 const PLAYER_WIDTH = 35;
@@ -213,7 +213,6 @@ function Game() {
         if ((keys.current['ArrowUp'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
           vy = JUMP_VELOCITY;
           nextOnGround = false;
-          jumpPressed.current = false; // Reset immediately to prevent repeat jumps
           console.log('Jump triggered:', { jumpKey: keys.current['ArrowUp'] || keys.current['w'] || keys.current[' '], onGround, jumpPressed: jumpPressed.current });
         }
 
