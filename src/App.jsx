@@ -21,7 +21,7 @@ const SPRITE_JUMP = [
 const GAME_WIDTH = 740;
 const GAME_HEIGHT = 367;
 const GROUND_Y = 300;
-const GRAVITY = 0.4;
+const GRAVITY = 0.36;
 const JUMP_VELOCITY = -8;
 const MOVE_SPEED = 1.7;
 const PLAYER_WIDTH = 35;
@@ -32,6 +32,12 @@ const ANIMATION_SPEEDS = {
   jump: 100,
   idle: 200
 };
+
+const PLATFORMS = [
+  { x: 20, y: 220, width: 80, height: 15 },
+  { x: -30, y: 160, width: 90, height: 15 },
+  { x: 100, y: 180, width: 60, height: 15 },
+];
 
 function preloadImages(srcArray) {
   return Promise.all(
@@ -147,14 +153,16 @@ function Character({ x, y, facing, state, frame, scale }) {
 function Game() {
   const [player, setPlayer] = useState({
     x: GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-    y: GROUND_Y - PLAYER_HEIGHT,
+    y: -PLAYER_HEIGHT, // Start above the screen so sprite falls
     vx: 0,
     vy: 0,
-    onGround: true,
+    onGround: false, // Not on ground at start
     facing: 'right',
     state: 'idle',
     frame: 0,
   });
+  const [textDrop, setTextDrop] = useState(false);
+  const [textY, setTextY] = useState(-80); // Start above the screen
   const keys = useRef({});
   const jumpPressed = useRef(false); // Track if jump key is pressed
   const raf = useRef();
@@ -163,6 +171,7 @@ function Game() {
     lastFrameTime: performance.now(),
     lastState: 'idle',
   });
+  const landedOnce = useRef(false);
 
   useEffect(() => {
     const handleDown = (e) => {
@@ -221,12 +230,33 @@ function Game() {
         let nextX = x + vx;
         let nextY = y + vy;
 
-        // Ground collision
-        if (nextY + PLAYER_HEIGHT >= GROUND_Y) {
+        // Platform collision detection
+        let landedOnPlatform = false;
+        for (const plat of PLATFORMS) {
+          // Check horizontal overlap
+          const horizontallyOver = nextX + PLAYER_WIDTH > plat.x && nextX < plat.x + plat.width;
+          // Check if falling and crossing the platform top between frames
+          const prevBottom = y + PLAYER_HEIGHT;
+          const nextBottom = nextY + PLAYER_HEIGHT;
+          const crossesPlatform = prevBottom <= plat.y && nextBottom >= plat.y;
+          if (horizontallyOver && crossesPlatform && vy > 0) {
+            // Land on platform
+            nextY = plat.y - PLAYER_HEIGHT;
+            vy = 0;
+            landedOnPlatform = true;
+            break;
+          }
+        }
+
+        // Ground collision (only if not on a platform)
+        if (!landedOnPlatform && nextY + PLAYER_HEIGHT >= GROUND_Y) {
           nextY = GROUND_Y - PLAYER_HEIGHT;
           vy = 0;
           nextOnGround = true;
-          console.log('Ground collision:', { y: nextY, groundY: GROUND_Y, onGround: nextOnGround });
+        } else if (landedOnPlatform) {
+          nextOnGround = true;
+        } else {
+          nextOnGround = false;
         }
 
         // Boundaries
@@ -252,6 +282,13 @@ function Game() {
           animationState.current.frame = 0;
         }
 
+        // Detect first landing on ground (not platform) - FIXED CONDITION
+        if (!landedOnce.current && !prev.onGround && nextOnGround && nextY + PLAYER_HEIGHT >= GROUND_Y - 1) {
+          landedOnce.current = true;
+          console.log('First landing detected! Triggering text drop.');
+          setTimeout(() => setTextDrop(true), 400); // Delay before text falls
+        }
+
         return {
           x: nextX,
           y: nextY,
@@ -259,7 +296,7 @@ function Game() {
           vy,
           onGround: nextOnGround,
           facing,
-          state: nextState,
+          state: nextOnGround ? (vx !== 0 ? 'run' : 'idle') : 'jump',
           frame: animationState.current.frame,
         };
       });
@@ -270,6 +307,30 @@ function Game() {
     raf.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf.current);
   }, []);
+
+  // Animate text falling after sprite lands
+  useEffect(() => {
+    if (!textDrop) {
+      setTextY(-80);
+      return;
+    }
+    console.log('Text drop animation starting!');
+    let running = true;
+    let vy = 0;
+    let y = -80;
+    const targetY = GAME_HEIGHT / 2 - 40; // Centered in game area
+    function animate() {
+      vy += 0.15; // gravity for text (was 0.7, now slower)
+      y += vy;
+      if (y > targetY) {
+        y = targetY;
+        running = false;
+      }
+      setTextY(y);
+      if (running) requestAnimationFrame(animate);
+    }
+    animate();
+  }, [textDrop]);
 
   const { width, height } = useWindowSize();
   const scale = Math.min(width / GAME_WIDTH, height / GAME_HEIGHT);
@@ -295,9 +356,28 @@ function Game() {
           top: offsetY,
           width: GAME_WIDTH * scale,
           height: GAME_HEIGHT * scale,
-          backgroundColor: 'rgba(0,0,0,0.1)',
+          backgroundColor: 'rgba(0,0,0,0)',
         }}
       >
+        {/* Render platforms */}
+        {PLATFORMS.map((plat, idx) => (
+          <img
+            key={idx}
+            src="/assets/platform.png"
+            alt="platform"
+            style={{
+              position: 'absolute',
+              left: plat.x * scale,
+              top: plat.y * scale,
+              width: plat.width * scale,
+              height: plat.height * scale,
+              zIndex: 0,
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+            draggable={false}
+          />
+        ))}
         <Character
           x={player.x * scale}
           y={player.y * scale}
@@ -306,6 +386,37 @@ function Game() {
           frame={player.frame}
           scale={scale}
         />
+        {/* Falling text - use local pixel-game font */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            top: textY * scale,
+            textAlign: 'center',
+            fontSize: 32 * scale,
+            fontWeight: 'normal', // Pixel fonts are usually normal weight
+            color: '#fff',
+            textShadow: `
+              -2px -2px 0 #000,  
+              2px -2px 0 #000,   
+              -2px 2px 0 #000,   
+              2px 2px 0 #000,    
+              0px 2px 0 #000,    
+              2px 0px 0 #000,    
+              0px -2px 0 #000,   
+              -2px 0px 0 #000
+            `,
+            pointerEvents: 'none',
+            transition: 'none',
+            zIndex: 10,
+            letterSpacing: 1,
+            fontFamily: 'PixelGameFont, monospace', // Use your local pixel-game font
+            userSelect: 'none',
+          }}
+        >
+          {textDrop && "Walk right to explore!"}
+        </div>
         <div
           style={{
             position: 'absolute',
@@ -320,7 +431,8 @@ function Game() {
         >
           State: {player.state} | Frame: {player.frame}/
           {player.state === 'run' ? SPRITE_RUN.length - 1 : player.state === 'jump' ? SPRITE_JUMP.length - 1 : 0} |
-          JumpPressed: {jumpPressed.current.toString()} | OnGround: {player.onGround.toString()}
+          JumpPressed: {jumpPressed.current.toString()} | OnGround: {player.onGround.toString()} |
+          TextDrop: {textDrop.toString()} | LandedOnce: {landedOnce.current.toString()}
         </div>
       </div>
     </div>

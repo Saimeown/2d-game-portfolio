@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+@font-face {
+  font-family: 'PixelGameFont';
+  src: url('/assets/pixel-game/Pixel-Game.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
