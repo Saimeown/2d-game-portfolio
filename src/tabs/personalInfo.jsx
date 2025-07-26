@@ -1,32 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Header } from '../components/Header.jsx';
 import { PlayerController } from '../components/PlayerController.jsx';
 
 export default function PersonalInfo() {
-  const [muted, setMuted] = useState(false);
-  const musicRef = useRef(null);
-  useEffect(() => {
-    const startMusic = () => {
-      if (musicRef.current) {
-        musicRef.current.volume = 0.5;
-        musicRef.current.muted = muted;
-        musicRef.current.play().catch(() => {});
-      }
-    };
-    window.addEventListener('pointerdown', startMusic, { once: true });
-    window.addEventListener('keydown', startMusic, { once: true });
-    return () => {
-      window.removeEventListener('pointerdown', startMusic);
-      window.removeEventListener('keydown', startMusic);
-    };
-  }, [muted]);
-  const toggleMute = () => {
-    setMuted(m => {
-      if (musicRef.current) musicRef.current.muted = !m;
-      return !m;
-    });
-  };
-
   return (
     <div
       style={{
@@ -39,14 +15,7 @@ export default function PersonalInfo() {
         minHeight: 0,
       }}
     >
-      <Header muted={muted} toggleMute={toggleMute} />
-      <audio
-        ref={musicRef}
-        src="/assets/background-music.mp3"
-        loop
-        preload="auto"
-        style={{ display: 'none' }}
-      />
+      <Header />
       <video
         autoPlay
         loop
@@ -64,7 +33,13 @@ export default function PersonalInfo() {
         }}
         src="src/assets/background-image.mp4"
       />
-      <PlayerController leftRoute="/" rightRoute={null} showText={false} />
+      <PlayerController
+        leftRoute="/"
+        rightRoute={null}
+        showText={false}
+        fallOnLoad={false}
+        startAtLeft={true}
+      />
       <div
         style={{
           position: 'relative',

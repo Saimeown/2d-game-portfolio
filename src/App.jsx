@@ -397,7 +397,7 @@ function Game() {
     const timeout = setTimeout(() => {
       clearInterval(interval);
       setTextBlink(true); // show text after blinking stops
-    }, 2000); // stop blinking after 2 seconds
+    }, 3000); // stop blinking after 2 seconds
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
@@ -488,7 +488,7 @@ function Game() {
             opacity: textBlink ? 1 : 0,
           }}
         >
-          {textDrop && "Walk right :)"}
+          {textDrop && "EXPLORE ME!"}
         </div>
         <div
           style={{

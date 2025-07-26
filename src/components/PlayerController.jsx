@@ -1,6 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sprite } from './Sprite.jsx';
+import PlayerPositionContext from '../PlayerPositionContext.js';
 
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',
@@ -20,6 +21,7 @@ const SPRITE_JUMP = [
   '/assets/sprite/Jump/frame_8.png',
 ];
 
+
 const GAME_WIDTH = 740;
 const GAME_HEIGHT = 367;
 const GROUND_Y = 300;
@@ -28,6 +30,13 @@ const JUMP_VELOCITY = -8;
 const MOVE_SPEED = 1.7;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 35;
+
+// Platform data (should match Platforms.jsx)
+const PLATFORMS = [
+  { x: 20, y: 220, width: 80, height: 15 },
+  { x: -30, y: 160, width: 90, height: 15 },
+  { x: 100, y: 180, width: 60, height: 15 },
+];
 
 const ANIMATION_SPEEDS = {
   run: 120,
@@ -45,22 +54,52 @@ function useWindowSize() {
   return size;
 }
 
-export function PlayerController({ leftRoute, rightRoute, showText }) {
+export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, startAtLeft }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { y: sharedY, setY: setSharedY } = useContext(PlayerPositionContext);
+
+  // Track initial render for rightRoute
+  const isInitialRender = useRef(!fallOnLoad && rightRoute && location.pathname === rightRoute);
+
+  // --- CRITICAL: Set initialX to 0 for rightRoute (next page) ---
+  let initialX;
+  if (startAtLeft) {
+    initialX = 0;
+  } else if (!fallOnLoad && rightRoute && location.pathname === rightRoute) {
+    initialX = 0; // Always start at left edge for next page
+  } else if (!fallOnLoad && leftRoute && location.pathname === leftRoute) {
+    initialX = GAME_WIDTH - PLAYER_WIDTH; // Start at right edge for previous page
+  } else if (fallOnLoad && rightRoute && location.pathname === rightRoute) {
+    initialX = GAME_WIDTH - PLAYER_WIDTH; // Start at right for fall on rightRoute
+  } else if (fallOnLoad && leftRoute && location.pathname === leftRoute) {
+    initialX = 0; // Start at left for fall on leftRoute
+  } else {
+    initialX = GAME_WIDTH / 2 - PLAYER_WIDTH / 2; // Default center
+  }
+
+  // --- CRITICAL: Fix initialY logic to only use sharedY if present and not falling ---
+  const initialY = (() => {
+    if (fallOnLoad) return -PLAYER_HEIGHT;
+    if (sharedY !== null && !fallOnLoad) return sharedY;
+    return GROUND_Y - PLAYER_HEIGHT;
+  })();
+
   const [player, setPlayer] = useState({
-    x: location.pathname === rightRoute ? GAME_WIDTH - PLAYER_WIDTH : GAME_WIDTH / 2 - PLAYER_WIDTH / 2,
-    y: -PLAYER_HEIGHT,
+    x: initialX,
+    y: initialY,
     vx: 0,
     vy: 0,
-    onGround: false,
-    facing: 'right',
+    onGround: !fallOnLoad,
+    facing: (!fallOnLoad && rightRoute && location.pathname === rightRoute) ? 'right' : 'left',
     state: 'idle',
     frame: 0,
   });
   const [textDrop, setTextDrop] = useState(false);
   const [textY, setTextY] = useState(-80);
-  const keys = useRef({});
+  // Use global key state to persist across page transitions
+  if (!window.__PLAYER_KEYS__) window.__PLAYER_KEYS__ = {};
+  const keys = React.useMemo(() => ({ current: window.__PLAYER_KEYS__ }), []);
   const jumpPressed = useRef(false);
   const raf = useRef();
   const animationState = useRef({
@@ -69,19 +108,33 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
     lastState: 'idle',
   });
   const landedOnce = useRef(false);
+  const jumpAudioRef = useRef(null);
+  const runAudioRef = useRef(null);
+  const runningRef = useRef(false);
 
   useEffect(() => {
+    jumpAudioRef.current = new Audio('/assets/jump-sfx.mp3');
+    jumpAudioRef.current.volume = 0.7;
+    runAudioRef.current = new Audio('/assets/run-sfx.mp3');
+    runAudioRef.current.volume = 0.7;
+    runAudioRef.current.loop = true;
+  }, []);
+
+  // Fix: Listen to both lower and upper case keys for WASD
+  useEffect(() => {
     const handleDown = (e) => {
-      if (!keys.current[e.key]) {
-        keys.current[e.key] = true;
-        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
+      const key = e.key.toLowerCase();
+      if (!window.__PLAYER_KEYS__[key]) {
+        window.__PLAYER_KEYS__[key] = true;
+        if (key === 'arrowup' || key === 'w' || key === ' ') {
           jumpPressed.current = true;
         }
       }
     };
     const handleUp = (e) => {
-      keys.current[e.key] = false;
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') {
+      const key = e.key.toLowerCase();
+      window.__PLAYER_KEYS__[key] = false;
+      if (key === 'arrowup' || key === 'w' || key === ' ') {
         jumpPressed.current = false;
       }
     };
@@ -97,26 +150,88 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
     function loop(now) {
       setPlayer((prev) => {
         let { x, y, vx, vy, facing, onGround } = prev;
-        if (keys.current['ArrowLeft'] || keys.current['a']) {
+        let moving = false;
+        // Fix: Use lower case for WASD keys
+        if (keys.current['arrowleft'] || keys.current['a']) {
           vx = -MOVE_SPEED;
           facing = 'left';
-        } else if (keys.current['ArrowRight'] || keys.current['d']) {
+          moving = true;
+        } else if (keys.current['arrowright'] || keys.current['d']) {
           vx = MOVE_SPEED;
           facing = 'right';
+          moving = true;
         } else {
           vx = 0;
         }
+        // Play/stop run sound effect
+        if (moving && prev.onGround) {
+          if (!runningRef.current && runAudioRef.current) {
+            runAudioRef.current.currentTime = 0;
+            runAudioRef.current.play();
+            runningRef.current = true;
+          }
+        } else {
+          if (runningRef.current && runAudioRef.current) {
+            runAudioRef.current.pause();
+            runAudioRef.current.currentTime = 0;
+            runningRef.current = false;
+          }
+        }
         let nextOnGround = onGround;
-        if ((keys.current['ArrowUp'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
+        if ((keys.current['arrowup'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
           vy = JUMP_VELOCITY;
           nextOnGround = false;
+          // Play jump sound
+          if (jumpAudioRef.current) {
+            jumpAudioRef.current.currentTime = 0;
+            jumpAudioRef.current.play();
+          }
+          // Stop run sound while in air
+          if (runAudioRef.current) {
+            runAudioRef.current.pause();
+            runAudioRef.current.currentTime = 0;
+            runningRef.current = false;
+          }
         }
         vy += GRAVITY;
         let nextX = x + vx;
+
+        // --- CRITICAL: Force sprite to left edge on initial render for rightRoute ---
+        if (!fallOnLoad && rightRoute && location.pathname === rightRoute && isInitialRender.current) {
+          nextX = 0; // Force to left edge
+          isInitialRender.current = false; // Disable after first update
+        }
+        // Always clamp to left edge if on rightRoute and not falling
+        if (!fallOnLoad && rightRoute && location.pathname === rightRoute) {
+          nextX = 0;
+        }
+
         let nextY = y + vy;
-        if (nextY + PLAYER_HEIGHT >= GROUND_Y) {
+        // Platform collision detection only on main page
+        let landedOnPlatform = false;
+        if (location.pathname === '/' || location.pathname === '/app') {
+          for (const plat of PLATFORMS) {
+            // Check horizontal overlap
+            const horizontallyOver = nextX + PLAYER_WIDTH > plat.x && nextX < plat.x + plat.width;
+            // Check if falling and crossing the platform top between frames
+            const prevBottom = y + PLAYER_HEIGHT;
+            const nextBottom = nextY + PLAYER_HEIGHT;
+            const crossesPlatform = prevBottom <= plat.y && nextBottom >= plat.y;
+            if (horizontallyOver && crossesPlatform && vy > 0) {
+              // Land on platform
+              nextY = plat.y - PLAYER_HEIGHT;
+              vy = 0;
+              landedOnPlatform = true;
+              break;
+            }
+          }
+        }
+        // Ground collision (only if not on a platform)
+        if (!landedOnPlatform && nextY + PLAYER_HEIGHT >= GROUND_Y) {
           nextY = GROUND_Y - PLAYER_HEIGHT;
           vy = 0;
+          nextOnGround = true;
+        } else if (landedOnPlatform) {
           nextOnGround = true;
         } else {
           nextOnGround = false;
@@ -125,12 +240,28 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
         if (nextX < 0) {
           nextX = 0;
           if (leftRoute && location.pathname !== leftRoute) {
+            // Save Y before navigating
+            if (setSharedY) setSharedY(nextY);
+            // Stop run SFX
+            if (runAudioRef.current) {
+              runAudioRef.current.pause();
+              runAudioRef.current.currentTime = 0;
+              runningRef.current = false;
+            }
             setTimeout(() => navigate(leftRoute), 0);
           }
         }
         if (nextX + PLAYER_WIDTH > GAME_WIDTH) {
           nextX = GAME_WIDTH - PLAYER_WIDTH;
           if (rightRoute && location.pathname !== rightRoute) {
+            // Save Y before navigating
+            if (setSharedY) setSharedY(nextY);
+            // Stop run SFX
+            if (runAudioRef.current) {
+              runAudioRef.current.pause();
+              runAudioRef.current.currentTime = 0;
+              runningRef.current = false;
+            }
             setTimeout(() => navigate(rightRoute), 0);
           }
         }
@@ -170,7 +301,7 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
     }
     raf.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf.current);
-  }, [navigate, leftRoute, rightRoute, location.pathname, showText]);
+  }, [navigate, leftRoute, rightRoute, location.pathname, showText, setSharedY, fallOnLoad, sharedY, keys]);
 
   // Animate text falling after sprite lands (if showText)
   const [textBlinkingActive, setTextBlinkingActive] = useState(false);
@@ -222,16 +353,15 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
   // Responsive scale and offset
   const { width, height } = useWindowSize();
   const scale = Math.min(width / GAME_WIDTH, height / GAME_HEIGHT);
-  const offsetX = (width - GAME_WIDTH * scale) / 2;
   const offsetY = (height - GAME_HEIGHT * scale) / 2;
 
   return (
     <div
       style={{
         position: 'absolute',
-        left: offsetX,
+        left: 0,
         top: offsetY,
-        width: GAME_WIDTH * scale,
+        width: '100vw',
         height: GAME_HEIGHT * scale,
         backgroundColor: 'rgba(0,0,0,0)',
         pointerEvents: 'none',
@@ -275,7 +405,7 @@ export function PlayerController({ leftRoute, rightRoute, showText }) {
             opacity: textBlink ? 1 : 0,
           }}
         >
-          {textDrop && "Walk right :)"}
+          {textDrop && "EXPLORE ME :)"}
         </div>
       )}
     </div>
