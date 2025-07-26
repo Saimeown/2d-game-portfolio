@@ -1,4 +1,7 @@
-import { useRef, useEffect, useState } from 'react';
+import { StrictMode, useRef, useEffect, useState } from 'react';
+import { Routes, Route, BrowserRouter, useNavigate } from "react-router-dom";
+import PersonalInfo from './personalInfo.jsx';
+import './index.css';
 
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',
@@ -172,6 +175,19 @@ function Game() {
     lastState: 'idle',
   });
   const landedOnce = useRef(false);
+  const jumpAudioRef = useRef(null);
+  const runAudioRef = useRef(null);
+  const runningRef = useRef(false);
+  const navigate = useNavigate(); // Add this line
+
+  useEffect(() => {
+    // Preload jump and run sounds
+    jumpAudioRef.current = new Audio('/assets/jump-sfx.mp3');
+    jumpAudioRef.current.volume = 0.7;
+    runAudioRef.current = new Audio('/assets/run-sfx.mp3');
+    runAudioRef.current.volume = 0.7;
+    runAudioRef.current.loop = true;
+  }, []);
 
   useEffect(() => {
     const handleDown = (e) => {
@@ -217,11 +233,37 @@ function Game() {
           vx = 0;
         }
 
+        // Play/stop run sound effect
+        if (moving && prev.onGround) {
+          if (!runningRef.current && runAudioRef.current) {
+            runAudioRef.current.currentTime = 0;
+            runAudioRef.current.play();
+            runningRef.current = true;
+          }
+        } else {
+          if (runningRef.current && runAudioRef.current) {
+            runAudioRef.current.pause();
+            runAudioRef.current.currentTime = 0;
+            runningRef.current = false;
+          }
+        }
+
         // Jump: Trigger only if on ground and jump key is newly pressed
         let nextOnGround = onGround;
         if ((keys.current['ArrowUp'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
           vy = JUMP_VELOCITY;
           nextOnGround = false;
+          // Play jump sound
+          if (jumpAudioRef.current) {
+            jumpAudioRef.current.currentTime = 0;
+            jumpAudioRef.current.play();
+          }
+          // Stop run sound while in air
+          if (runAudioRef.current) {
+            runAudioRef.current.pause();
+            runAudioRef.current.currentTime = 0;
+            runningRef.current = false;
+          }
           console.log('Jump triggered:', { jumpKey: keys.current['ArrowUp'] || keys.current['w'] || keys.current[' '], onGround, jumpPressed: jumpPressed.current });
         }
 
@@ -261,7 +303,13 @@ function Game() {
 
         // Boundaries
         if (nextX < 0) nextX = 0;
-        if (nextX + PLAYER_WIDTH > GAME_WIDTH) nextX = GAME_WIDTH - PLAYER_WIDTH;
+        if (nextX + PLAYER_WIDTH > GAME_WIDTH) {
+          nextX = GAME_WIDTH - PLAYER_WIDTH;
+          // Move to another page when colliding with the right edge
+          setTimeout(() => {
+            navigate("/next"); // Change "/next" to your desired route
+          }, 0);
+        }
 
         // Animation state
         let nextState = nextOnGround ? (moving ? 'run' : 'idle') : 'jump';
@@ -306,12 +354,14 @@ function Game() {
 
     raf.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf.current);
-  }, []);
+  }, [navigate]);
 
   // Animate text falling after sprite lands
+  const [textBlinkingActive, setTextBlinkingActive] = useState(false);
   useEffect(() => {
     if (!textDrop) {
       setTextY(-80);
+      setTextBlinkingActive(false);
       return;
     }
     console.log('Text drop animation starting!');
@@ -325,6 +375,7 @@ function Game() {
       if (y > targetY) {
         y = targetY;
         running = false;
+        setTextBlinkingActive(true); // Start blinking when done falling
       }
       setTextY(y);
       if (running) requestAnimationFrame(animate);
@@ -332,6 +383,27 @@ function Game() {
     animate();
   }, [textDrop]);
 
+  // Blinking effect for falling text (only after fall is done)
+  const [textBlink, setTextBlink] = useState(true);
+  useEffect(() => {
+    if (!textBlinkingActive) {
+      setTextBlink(true);
+      return;
+    }
+    setTextBlink(true);
+    const interval = setInterval(() => {
+      setTextBlink(b => !b);
+    }, 180); // blink every 180ms (faster)
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      setTextBlink(true); // show text after blinking stops
+    }, 2000); // stop blinking after 2 seconds
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [textBlinkingActive]);
+  
   const { width, height } = useWindowSize();
   const scale = Math.min(width / GAME_WIDTH, height / GAME_HEIGHT);
   const offsetX = (width - GAME_WIDTH * scale) / 2;
@@ -408,14 +480,15 @@ function Game() {
               -2px 0px 0 #000
             `,
             pointerEvents: 'none',
-            transition: 'none',
+            transition: 'opacity 0.1s',
             zIndex: 10,
             letterSpacing: 1,
             fontFamily: 'PixelGameFont, monospace', // Use your local pixel-game font
             userSelect: 'none',
+            opacity: textBlink ? 1 : 0,
           }}
         >
-          {textDrop && "Walk right to explore!"}
+          {textDrop && "Walk right :)"}
         </div>
         <div
           style={{
@@ -440,6 +513,34 @@ function Game() {
 }
 
 function App() {
+  // Background music logic
+  const musicRef = useRef(null);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    const startMusic = () => {
+      if (musicRef.current) {
+        musicRef.current.volume = 0.5;
+        musicRef.current.muted = muted;
+        musicRef.current.play().catch(() => {});
+      }
+    };
+    window.addEventListener('pointerdown', startMusic, { once: true });
+    window.addEventListener('keydown', startMusic, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', startMusic);
+      window.removeEventListener('keydown', startMusic);
+    };
+  }, [muted]);
+
+  // Toggle mute state and update audio element
+  const toggleMute = () => {
+    setMuted(m => {
+      if (musicRef.current) musicRef.current.muted = !m;
+      return !m;
+    });
+  };
+
   return (
     <div
       style={{
@@ -452,6 +553,53 @@ function App() {
         minHeight: 0,
       }}
     >
+      {/* Mute/unmute button */}
+      <button
+        onClick={toggleMute}
+        style={{
+          position: 'absolute',
+          top: 18,
+          right: 18,
+          zIndex: 100,
+          background: 'rgba(0,0,0,0.6)',
+          border: 'none',
+          borderRadius: '50%',
+          width: 40,
+          height: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          color: '#fff',
+          fontSize: 22,
+          pointerEvents: 'auto',
+        }}
+        aria-label={muted ? 'Unmute music' : 'Mute music'}
+      >
+        {muted ? (
+          // Muted icon (simple SVG)
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 8v6h4l5 5V3l-5 5H4z" fill="currentColor" opacity="0.5"/>
+            <line x1="16" y1="6" x2="21" y2="16" stroke="currentColor" strokeWidth="2"/>
+            <line x1="21" y1="6" x2="16" y2="16" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+        ) : (
+          // Sound icon (simple SVG)
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 8v6h4l5 5V3l-5 5H4z" fill="currentColor"/>
+            <path d="M17 7a6 6 0 010 8" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <path d="M19 5a9 9 0 010 12" stroke="currentColor" strokeWidth="2" fill="none"/>
+          </svg>
+        )}
+      </button>
+      {/* Background music audio element */}
+      <audio
+        ref={musicRef}
+        src="/assets/background-music.mp3"
+        loop
+        preload="auto"
+        style={{ display: 'none' }}
+      />
       <video
         autoPlay
         loop
@@ -469,7 +617,10 @@ function App() {
         }}
         src="src/assets/background-image.mp4"
       />
-      <Game />
+      <Routes>
+        <Route path="/" element={<Game />} />
+        <Route path="/next" element={<PersonalInfo />} />
+      </Routes>
     </div>
   );
 }
