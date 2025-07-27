@@ -4,10 +4,10 @@ import { Sprite } from './Sprite.jsx';
 import PlayerPositionContext from '../PlayerPositionContext.js';
 
 const SPRITE_IDLE = [
-  '/assets/sprite/idle/frame_1.png',
-  '/assets/sprite/idle/frame_2.png',
-  '/assets/sprite/idle/frame_3.png',
-  '/assets/sprite/idle/frame_4.png',
+  '/assets/sprite/Idle/frame_1.png',
+  '/assets/sprite/Idle/frame_2.png',
+  '/assets/sprite/Idle/frame_3.png',
+  '/assets/sprite/Idle/frame_4.png',
 ];
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',
@@ -35,13 +35,6 @@ const JUMP_VELOCITY = -8;
 const MOVE_SPEED = 1.7;
 const PLAYER_WIDTH = 35;
 const PLAYER_HEIGHT = 35;
-
-// Platform data (should match Platforms.jsx)
-const PLATFORMS = [
-  { x: 20, y: 220, width: 80, height: 15 },
-  { x: -30, y: 160, width: 90, height: 15 },
-  { x: 100, y: 180, width: 60, height: 15 },
-];
 
 const ANIMATION_SPEEDS = {
   run: 120,
@@ -214,23 +207,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         let nextY = y + vy;
         // Platform collision detection only on main page
         let landedOnPlatform = false;
-        if (location.pathname === '/' || location.pathname === '/app') {
-          for (const plat of PLATFORMS) {
-            // Check horizontal overlap
-            const horizontallyOver = nextX + PLAYER_WIDTH > plat.x && nextX < plat.x + plat.width;
-            // Check if falling and crossing the platform top between frames
-            const prevBottom = y + PLAYER_HEIGHT;
-            const nextBottom = nextY + PLAYER_HEIGHT;
-            const crossesPlatform = prevBottom <= plat.y && nextBottom >= plat.y;
-            if (horizontallyOver && crossesPlatform && vy > 0) {
-              // Land on platform
-              nextY = plat.y - PLAYER_HEIGHT;
-              vy = 0;
-              landedOnPlatform = true;
-              break;
-            }
-          }
-        }
+        
         // Ground collision (only if not on a platform)
         if (!landedOnPlatform && nextY + PLAYER_HEIGHT >= GROUND_Y) {
           nextY = GROUND_Y - PLAYER_HEIGHT;
@@ -384,9 +361,9 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             position: 'absolute',
             left: 0,
             width: '100%',
-            top: textY * scale,
+            top: -100 + textY * scale,
             textAlign: 'center',
-            fontSize: 32 * scale,
+            fontSize: 50 * scale,
             fontWeight: 'normal',
             color: '#fff',
             textShadow: `
@@ -408,7 +385,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             opacity: textBlink ? 1 : 0,
           }}
         >
-          {textDrop && "EXPLORE ME :)"}
+          {textDrop && "START YOUR QUEST >>>"}
         </div>
       )}
     </div>

@@ -1,10 +1,10 @@
 import React from 'react';
 
 const SPRITE_IDLE = [
-  '/assets/sprite/idle/frame_1.png',
-  '/assets/sprite/idle/frame_2.png',
-  '/assets/sprite/idle/frame_3.png',
-  '/assets/sprite/idle/frame_4.png',
+  '/assets/sprite/Idle/frame_1.png',
+  '/assets/sprite/Idle/frame_2.png',
+  '/assets/sprite/Idle/frame_3.png',
+  '/assets/sprite/Idle/frame_4.png',
 ];
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',

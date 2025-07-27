@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header.jsx';
 import { PlayerController } from '../components/PlayerController.jsx';
 
 export default function PersonalInfo() {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    function handleResize() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setScale(Math.min(width / 740, height / 367));
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Standee position: x = 600 (right side), y = ground level
+  const STANDEE_X = 600;
+  const STANDEE_Y = 300 - 60; // 60 is standee height, adjust if needed
+
+  // Center vertically using same offset as PlayerController
+  const offsetY = (window.innerHeight - 367 * scale) / 2;
+
   return (
     <div
       style={{
@@ -32,6 +51,38 @@ export default function PersonalInfo() {
           pointerEvents: 'none',
         }}
         src="src/assets/background-image.mp4"
+      />
+      {/* Standee image at same y as sprite, right side */}
+      <img
+        src="/assets/standee-rightArrow.png"
+        alt="Standee"
+        style={{
+          position: 'absolute',
+          left: -1460 + STANDEE_X * scale,
+          top: 70 + offsetY + STANDEE_Y * scale,
+          width: 30 * scale,
+          height: 30 * scale,
+          zIndex: 2,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      {/* Billboard image at same y as sprite, right side */}
+      <img
+        src="/assets/BILLBOARD.png"
+        alt="Billboard"
+        style={{
+          position: 'absolute',
+          left: -1230 + STANDEE_X * scale,
+          top: -240 + offsetY + STANDEE_Y * scale,
+          width: 150 * scale,
+          height: 150 * scale,
+          zIndex: 2,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
       />
       <PlayerController
         leftRoute="/"
@@ -67,8 +118,6 @@ export default function PersonalInfo() {
         }}
       >
         <h1 style={{ marginBottom: 24 }}>Personal Info</h1>
-        <p>Hello! This is the next page.</p>
-        <p>Put your personal information or portfolio details here.</p>
       </div>
     </div>
   );
