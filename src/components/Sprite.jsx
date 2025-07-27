@@ -1,5 +1,11 @@
 import React from 'react';
 
+const SPRITE_IDLE = [
+  '/assets/sprite/idle/frame_1.png',
+  '/assets/sprite/idle/frame_2.png',
+  '/assets/sprite/idle/frame_3.png',
+  '/assets/sprite/idle/frame_4.png',
+];
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',
   '/assets/sprite/Run/frame_2.png',
@@ -58,20 +64,23 @@ function useImages(srcArr) {
 }
 
 export function Sprite({ x, y, facing, state, frame, scale }) {
+  const { images: idleImgs, loaded: idleLoaded } = useImages(SPRITE_IDLE);
   const { images: runImgs, loaded: runLoaded } = useImages(SPRITE_RUN);
   const { images: jumpImgs, loaded: jumpLoaded } = useImages(SPRITE_JUMP);
 
-  if (!runLoaded || !jumpLoaded) {
+  if (!idleLoaded || !runLoaded || !jumpLoaded) {
     return <div style={{ position: 'absolute', left: x, top: y, width: PLAYER_WIDTH * scale, height: PLAYER_HEIGHT * scale, backgroundColor: 'red' }} />;
   }
 
   let img = null;
-  if (state === 'jump' && jumpImgs.length > 0) {
-    img = jumpImgs[frame % jumpImgs.length];
+  if (state === 'idle' && idleImgs.length > 0) {
+    img = idleImgs[frame % idleImgs.length];
   } else if (state === 'run' && runImgs.length > 0) {
     img = runImgs[frame % runImgs.length];
-  } else if (runImgs.length > 0) {
-    img = runImgs[0];
+  } else if (state === 'jump' && jumpImgs.length > 0) {
+    img = jumpImgs[frame % jumpImgs.length];
+  } else if (idleImgs.length > 0) {
+    img = idleImgs[0]; // Fallback to first idle frame
   }
 
   if (!img) return null;

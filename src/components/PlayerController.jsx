@@ -3,6 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Sprite } from './Sprite.jsx';
 import PlayerPositionContext from '../PlayerPositionContext.js';
 
+const SPRITE_IDLE = [
+  '/assets/sprite/idle/frame_1.png',
+  '/assets/sprite/idle/frame_2.png',
+  '/assets/sprite/idle/frame_3.png',
+  '/assets/sprite/idle/frame_4.png',
+];
 const SPRITE_RUN = [
   '/assets/sprite/Jump/frame_8.png',
   '/assets/sprite/Run/frame_2.png',
@@ -20,7 +26,6 @@ const SPRITE_JUMP = [
   '/assets/sprite/Jump/frame_7.png',
   '/assets/sprite/Jump/frame_8.png',
 ];
-
 
 const GAME_WIDTH = 740;
 const GAME_HEIGHT = 367;
@@ -271,15 +276,13 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
           animationState.current.frame = 0;
           animationState.current.lastFrameTime = now;
           animationState.current.lastState = nextState;
-        } else if (nextState === 'run' || nextState === 'jump') {
-          const animationSpeed = ANIMATION_SPEEDS[nextState];
-          const frameCount = nextState === 'run' ? SPRITE_RUN.length : SPRITE_JUMP.length;
-          if (now - animationState.current.lastFrameTime >= animationSpeed) {
-            animationState.current.frame = (animationState.current.frame + 1) % frameCount;
-            animationState.current.lastFrameTime = now - (now - animationState.current.lastFrameTime - animationSpeed);
-          }
-        } else {
-          animationState.current.frame = 0;
+        }
+        // Update frames for all states, including idle
+        const animationSpeed = ANIMATION_SPEEDS[nextState];
+        const frameCount = nextState === 'run' ? SPRITE_RUN.length : nextState === 'jump' ? SPRITE_JUMP.length : SPRITE_IDLE.length;
+        if (now - animationState.current.lastFrameTime >= animationSpeed) {
+          animationState.current.frame = (animationState.current.frame + 1) % frameCount;
+          animationState.current.lastFrameTime = now - (now - animationState.current.lastFrameTime - animationSpeed);
         }
         // Text drop logic (only on first landing, if showText)
         if (showText && !landedOnce.current && !prev.onGround && nextOnGround && nextY + PLAYER_HEIGHT >= GROUND_Y - 1) {
@@ -293,7 +296,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
           vy,
           onGround: nextOnGround,
           facing,
-          state: nextOnGround ? (vx !== 0 ? 'run' : 'idle') : 'jump',
+          state: nextState,
           frame: animationState.current.frame,
         };
       });
