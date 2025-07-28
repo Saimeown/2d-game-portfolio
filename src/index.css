@@ -22,12 +22,12 @@ a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+body, html {
+  cursor: url('/assets/cursor/cursor-default.png'), auto;
+}
+
+button, a, [role="button"], .pointer-cursor {
+  cursor: url('/assets/cursor/cursor-pointer.png'), pointer;
 }
 
 h1 {

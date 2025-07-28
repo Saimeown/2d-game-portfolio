@@ -1,3 +1,12 @@
+body, html {
+  cursor: url('/assets/cursor/cursor-default.png'), auto;
+}
+
+button, a, [role="button"], .pointer-cursor {
+  cursor: url('/assets/cursor/cursor-pointer.png'), pointer;
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;

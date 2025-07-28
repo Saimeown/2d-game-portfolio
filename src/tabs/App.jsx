@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route } from "react-router-dom";
 import { Header } from '../components/Header.jsx';
 import { PlayerController } from '../components/PlayerController.jsx';
-import { Platforms } from '../components/Platforms.jsx';
 import PersonalInfo from './personalInfo.jsx';
 import '../index.css';
 
@@ -19,19 +18,50 @@ function MainWithPlatforms() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Standee position: x = 600 (right side), y = ground level
   const STANDEE_X = 600;
-  const STANDEE_Y = 300 - 60; // 60 is standee height, adjust if needed
-  // Store position: x = 40 (left side), y = ground level
+  const STANDEE_Y = 300 - 60; // 240
   const STORE_X = 40;
-  const STORE_Y = 300 - 60; // 60 is store height, adjust if needed
-
-  // Center vertically using same offset as PlayerController
+  const STORE_Y = 300 - 60;
   const offsetY = (window.innerHeight - 367 * scale) / 2;
+
+  // Define grass platforms
+  const grassPlatforms = [
+    {
+      x: -378 + STANDEE_X, // -400
+      y: 4 + STANDEE_Y, // 250
+      width: 10,
+      height: 13,
+    },
+    {
+      x: -455 + STANDEE_X, // -500
+      y: -65.4 + STANDEE_Y, // 160
+      width: 10,
+      height: 13,
+    },
+    {
+      x: -415 + STANDEE_X, // -600
+      y: -31 + STANDEE_Y, // 70
+      width: 10,
+      height: 13,
+    },
+    {
+      x: 37 + STANDEE_X, // -600
+      y: -143 + STANDEE_Y, // 70
+      width: 10,
+      height: 13,
+    },
+    {
+      x: 76 + STANDEE_X, // -600
+      y: -182 + STANDEE_Y, // 70
+      width: 10,
+      height: 13,
+    },
+    
+  ];
 
   return (
     <>
-      {/* Store image at same y as sprite, left side */}
+      {/* Store image */}
       <img
         src="public/assets/STORE.png"
         alt="Store"
@@ -47,7 +77,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Standee image at same y as sprite, right side */}
+      {/* Standee image */}
       <img
         src="/assets/standee-rightArrow.png"
         alt="Standee"
@@ -63,7 +93,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Hotel Image at same y as sprite, right side */}
+      {/* Hotel Image */}
       <img
         src="/assets/HOTEL.png"
         alt="Standee"
@@ -79,7 +109,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Billboard image at same y as sprite, right side */}
+      {/* Billboard image */}
       <img
         src="/assets/BILLBOARD.png"
         alt="Standee"
@@ -95,7 +125,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* School image at same y as sprite, right side */}
+      {/* School image */}
       <img
         src="/assets/SCHOOL.png"
         alt="School"
@@ -111,7 +141,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Cart image at same y as sprite, right side */}
+      {/* Cart image */}
       <img
         src="/assets/CART.png"
         alt="Cart"
@@ -127,7 +157,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Building image at same y as sprite, right side */}
+      {/* Building image */}
       <img
         src="/assets/BUILDING.png"
         alt="Building"
@@ -143,7 +173,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Fence image 1 at same y as sprite, right side */}
+      {/* Fence image 1 */}
       <img
         src="/assets/FENCE.png"
         alt="Fence"
@@ -159,7 +189,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Fence image 2 at same y as sprite, right side */}
+      {/* Fence image 2 */}
       <img
         src="/assets/FENCE.png"
         alt="Fence"
@@ -175,7 +205,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Fence image 3 at same y as sprite, right side */}
+      {/* Fence image 3 */}
       <img
         src="/assets/FENCE.png"
         alt="Fence"
@@ -191,8 +221,7 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-
-      {/* Grass 1 image at same y as sprite, right side */}
+      {/* Grass images */}
       <img
         src="/assets/grass.png"
         alt="Grass"
@@ -208,7 +237,6 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Grass 2 image at same y as sprite, right side */}
       <img
         src="/assets/grass.png"
         alt="Grass"
@@ -224,7 +252,6 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/* Grass 3 image at same y as sprite, right side */}
       <img
         src="/assets/grass.png"
         alt="Grass"
@@ -240,24 +267,76 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      <PlayerController leftRoute={null} rightRoute="/next" showText={true} fallOnLoad={true} />
+      <img
+        src="/assets/grass.png"
+        alt="Grass"
+        style={{
+          position: 'absolute',
+          left: 70 + STANDEE_X * scale,
+          top: -370 + offsetY + STANDEE_Y * scale,
+          width: 32 * scale,
+          height: 13 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      <img
+        src="/assets/grass.png"
+        alt="Grass"
+        style={{
+          position: 'absolute',
+          left: 170 + STANDEE_X * scale,
+          top: -470 + offsetY + STANDEE_Y * scale,
+          width: 32 * scale,
+          height: 13 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      {/*
+      {grassPlatforms.map((platform, index) => (
+        <div
+          key={`grass-visual-${index}`}
+          style={{
+            position: 'absolute',
+            left: platform.x * scale,
+            top: platform.y * scale + offsetY,
+            width: platform.width * scale,
+            height: platform.height * scale,
+            border: '2px solid blue',
+            backgroundColor: 'rgba(0, 0, 255, 0.3)',
+            zIndex: 10,
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+      */}
+      <PlayerController
+        leftRoute={null}
+        rightRoute="/next"
+        showText={true}
+        fallOnLoad={true}
+        platforms={grassPlatforms} // Pass platforms to PlayerController
+      />
     </>
   );
 }
 
 export default function App() {
   useEffect(() => {
-    // Check if the sound has already been played in this session
     const hasPlayed = sessionStorage.getItem('startSoundPlayed');
     if (!hasPlayed) {
       const audio = new Audio('/assets/start-sfx.mp3');
       audio.play().catch((error) => {
         console.error('Error playing start sound:', error);
       });
-      // Mark the sound as played in this session
       sessionStorage.setItem('startSoundPlayed', 'true');
     }
-  }, []); // Empty dependency array ensures this runs only on first mount
+  }, []);
 
   return (
     <div
@@ -290,14 +369,8 @@ export default function App() {
         src="src/assets/background-image.mp4"
       />
       <Routes>
-        <Route
-          path="/"
-          element={<MainWithPlatforms />}
-        />
-        <Route
-          path="/next"
-          element={<PersonalInfo />}
-        />
+        <Route path="/" element={<MainWithPlatforms />} />
+        <Route path="/next" element={<PersonalInfo />} />
       </Routes>
     </div>
   );

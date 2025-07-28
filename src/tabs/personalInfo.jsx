@@ -22,6 +22,16 @@ export default function PersonalInfo() {
   // Center vertically using same offset as PlayerController
   const offsetY = (window.innerHeight - 367 * scale) / 2;
 
+  // Example: One grass platform in the middle
+  const grassPlatforms = [
+    {
+      x: 140, // horizontal position (adjust as needed)
+      y: 247, // vertical position (adjust as needed)
+      width: 120, // width of the platform
+      height: 20, // height of the platform
+    },
+  ];
+
   return (
     <div
       style={{
@@ -51,6 +61,22 @@ export default function PersonalInfo() {
           pointerEvents: 'none',
         }}
         src="src/assets/background-image.mp4"
+      />
+      {/* Store image */}
+      <img
+        src="public/assets/STORE.png"
+        alt="Store"
+        style={{
+          position: 'absolute',
+          left: -1680 + STANDEE_X * scale,
+          top: -60 + offsetY + STANDEE_Y * scale,
+          width: 80 * scale,
+          height: 80 * scale,
+          zIndex: 2,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
       />
       {/* Standee image at same y as sprite, right side */}
       <img
@@ -90,7 +116,28 @@ export default function PersonalInfo() {
         showText={false}
         fallOnLoad={false}
         startAtLeft={true}
+        platforms={grassPlatforms}
       />
+
+      {/*
+      {grassPlatforms.map((platform, idx) => (
+        <div
+          key={idx}
+          style={{
+            position: 'absolute',
+            left: platform.x * scale,
+            top: platform.y * scale + offsetY,
+            width: platform.width * scale,
+            height: platform.height * scale,
+            background: 'rgba(0,255,0,0.3)',
+            border: '2px solid green',
+            zIndex: 10,
+            pointerEvents: 'none',
+          }}
+        />
+      ))}
+      */}
+
       <div
         style={{
           position: 'relative',
