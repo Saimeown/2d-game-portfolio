@@ -28,7 +28,7 @@ export default function PersonalInfo() {
       x: 140, // horizontal position (adjust as needed)
       y: 247, // vertical position (adjust as needed)
       width: 120, // width of the platform
-      height: 20, // height of the platform
+      height: 3, // height of the platform
     },
   ];
 

@@ -1,9 +1,14 @@
 body, html {
-  cursor: url('/assets/cursor/cursor-default.png'), auto;
+  cursor: url('/assets/cursor/cursor-default.png'), auto !important;
 }
 
 button, a, [role="button"], .pointer-cursor {
-  cursor: url('/assets/cursor/cursor-pointer.png'), pointer;
+  cursor: url('/assets/cursor/cursor-pointer.png'), pointer !important;
+}
+
+/* Additional specificity for interactive elements */
+button:hover, a:hover, [role="button"]:hover, .pointer-cursor:hover {
+  cursor: url('/assets/cursor/cursor-pointer.png'), pointer !important;
 }
 
 

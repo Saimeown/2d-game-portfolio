@@ -30,33 +30,38 @@ function MainWithPlatforms() {
       x: -378 + STANDEE_X, // -400
       y: 4 + STANDEE_Y, // 250
       width: 10,
-      height: 13,
+      height: 7,
     },
     {
       x: -455 + STANDEE_X, // -500
       y: -65.4 + STANDEE_Y, // 160
       width: 10,
-      height: 13,
+      height: 7,
     },
     {
       x: -415 + STANDEE_X, // -600
       y: -31 + STANDEE_Y, // 70
       width: 10,
-      height: 13,
+      height: 7,
     },
     {
       x: 37 + STANDEE_X, // -600
       y: -143 + STANDEE_Y, // 70
       width: 10,
-      height: 13,
+      height: 7,
     },
     {
       x: 76 + STANDEE_X, // -600
       y: -182 + STANDEE_Y, // 70
       width: 10,
-      height: 13,
+      height: 7,
     },
-    
+    {
+      x: -582 + STANDEE_X, // -600
+      y: -154 + STANDEE_Y, // 70
+      width: 75,
+      height: 7,
+    },
   ];
 
   return (
@@ -221,10 +226,42 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
+      {/* Fence image 4 */}
+      <img
+        src="/assets/FENCE.png"
+        alt="Fence"
+        style={{
+          position: 'absolute',
+          left: -550 + STANDEE_X * scale,
+          top: 75 + offsetY + STANDEE_Y * scale,
+          width: 120 * scale,
+          height: 28 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      {/* Fence image 5 */}
+      <img
+        src="/assets/FENCE.png"
+        alt="Fence"
+        style={{
+          position: 'absolute',
+          left: -350 + STANDEE_X * scale,
+          top: 75 + offsetY + STANDEE_Y * scale,
+          width: 120 * scale,
+          height: 28 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
       {/* Grass images */}
       <img
-        src="/assets/grass.png"
-        alt="Grass"
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
         style={{
           position: 'absolute',
           left: -1000 + STANDEE_X * scale,
@@ -238,8 +275,8 @@ function MainWithPlatforms() {
         draggable={false}
       />
       <img
-        src="/assets/grass.png"
-        alt="Grass"
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
         style={{
           position: 'absolute',
           left: -1100 + STANDEE_X * scale,
@@ -253,8 +290,8 @@ function MainWithPlatforms() {
         draggable={false}
       />
       <img
-        src="/assets/grass.png"
-        alt="Grass"
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
         style={{
           position: 'absolute',
           left: -1200 + STANDEE_X * scale,
@@ -268,8 +305,8 @@ function MainWithPlatforms() {
         draggable={false}
       />
       <img
-        src="/assets/grass.png"
-        alt="Grass"
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
         style={{
           position: 'absolute',
           left: 70 + STANDEE_X * scale,
@@ -283,8 +320,8 @@ function MainWithPlatforms() {
         draggable={false}
       />
       <img
-        src="/assets/grass.png"
-        alt="Grass"
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
         style={{
           position: 'absolute',
           left: 170 + STANDEE_X * scale,
@@ -297,7 +334,52 @@ function MainWithPlatforms() {
         }}
         draggable={false}
       />
-      {/*
+      <img
+        src="/assets/LONG-BRICK.png"
+        alt="Brick"
+        style={{
+          position: 'absolute',
+          left: -1505 + STANDEE_X * scale,
+          top: -400 + offsetY + STANDEE_Y * scale,
+          width: 80 * scale,
+          height: 13 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      <img
+        src="/assets/standee-exclamation.png"
+        alt="Exclamation"
+        style={{
+          position: 'absolute',
+          left: -1385 + STANDEE_X * scale,
+          top: -462 + offsetY + STANDEE_Y * scale,
+          width: 25 * scale,
+          height: 25 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      <img
+        src="/assets/DOOR.png"
+        alt="Door"
+        style={{
+          position: 'absolute',
+          left: -1475 + STANDEE_X * scale,
+          top: -515.5 + offsetY + STANDEE_Y * scale,
+          width: 30 * scale,
+          height: 45 * scale,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      {/*}
       {grassPlatforms.map((platform, index) => (
         <div
           key={`grass-visual-${index}`}

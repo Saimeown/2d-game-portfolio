@@ -1,12 +1,15 @@
 import React, { useRef, useEffect, useState } from 'react';
 import App from './tabs/App.jsx';
-import MusicContext from './MusicContext.js';
+import MusicContext, { SoundEffectsContext } from './MusicContext.js';
 import PlayerPositionContext from './PlayerPositionContext.js';
+import { PlayerMovementProvider } from './PlayerMovementContext.jsx';
 
 export default function MainApp() {
   const [muted, setMuted] = useState(false);
+  const [sfxMuted, setSfxMuted] = useState(false); // Sound effects mute state
   const musicRef = useRef(null);
   const [playerY, setPlayerY] = useState(null);
+  const wasSfxMuted = useRef(sfxMuted);
 
   useEffect(() => {
     const startMusic = () => {
@@ -24,6 +27,10 @@ export default function MainApp() {
     };
   }, [muted]);
 
+  useEffect(() => {
+    wasSfxMuted.current = sfxMuted;
+  }, [sfxMuted]);
+
   const toggleMute = () => {
     setMuted(m => {
       if (musicRef.current) musicRef.current.muted = !m;
@@ -31,18 +38,26 @@ export default function MainApp() {
     });
   };
 
+  const toggleSfxMute = () => {
+    setSfxMuted(m => !m);
+  };
+
   return (
     <MusicContext.Provider value={{ muted, toggleMute }}>
-      <PlayerPositionContext.Provider value={{ y: playerY, setY: setPlayerY }}>
-        <audio
-          ref={musicRef}
-          src="/assets/background-music.mp3"
-          loop
-          preload="auto"
-          style={{ display: 'none' }}
-        />
-        <App />
-      </PlayerPositionContext.Provider>
+      <SoundEffectsContext.Provider value={{ muted: sfxMuted, toggleMute: toggleSfxMute }}>
+        <PlayerPositionContext.Provider value={{ y: playerY, setY: setPlayerY }}>
+          <PlayerMovementProvider>
+            <audio
+              ref={musicRef}
+              src="/assets/background-music.mp3"
+              loop
+              preload="auto"
+              style={{ display: 'none' }}
+            />
+            <App />
+          </PlayerMovementProvider>
+        </PlayerPositionContext.Provider>
+      </SoundEffectsContext.Provider>
     </MusicContext.Provider>
   );
 }

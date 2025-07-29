@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sprite } from './Sprite.jsx';
 import PlayerPositionContext from '../PlayerPositionContext.js';
+import PlayerMovementContext from '../PlayerMovementContext.jsx';
+import { SoundEffectsContext } from '../MusicContext.js';
 
 const SPRITE_IDLE = [
   '/assets/sprite/Idle/frame_1.png',
@@ -56,6 +58,8 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
   const navigate = useNavigate();
   const location = useLocation();
   const { y: sharedY, setY: setSharedY } = useContext(PlayerPositionContext);
+  const { setIsMoving } = useContext(PlayerMovementContext);
+  const { muted: sfxMuted } = useContext(SoundEffectsContext);
 
   const isInitialRender = useRef(!fallOnLoad && rightRoute && location.pathname === rightRoute);
   const lastLandedPlatform = useRef(null); // Track last landed platform index
@@ -122,6 +126,15 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
     bumpAudioRef.current.volume = 0.8;
     console.log('Audio initialized');
   }, []);
+
+  // Handle SFX muting - stop run audio immediately when muted
+  useEffect(() => {
+    if (sfxMuted && runAudioRef.current && runningRef.current) {
+      runAudioRef.current.pause();
+      runAudioRef.current.currentTime = 0;
+      runningRef.current = false;
+    }
+  }, [sfxMuted]);
 
   useEffect(() => {
     const handleDown = (e) => {
@@ -254,8 +267,11 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         } else {
           vx = 0;
         }
+        
+        // Update movement context
+        setIsMoving(moving && prev.onGround);
         if (moving && prev.onGround) {
-          if (!runningRef.current && runAudioRef.current) {
+          if (!runningRef.current && runAudioRef.current && !sfxMuted) {
             runAudioRef.current.currentTime = 0;
             runAudioRef.current.play().catch((e) => console.error('Run audio error:', e));
             runningRef.current = true;
@@ -271,7 +287,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         if ((keys.current['arrowup'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
           vy = JUMP_VELOCITY;
           nextOnGround = false;
-          if (jumpAudioRef.current) {
+          if (jumpAudioRef.current && !sfxMuted) {
             jumpAudioRef.current.currentTime = 0;
             jumpAudioRef.current.play().catch((e) => console.error('Jump audio error:', e));
           }
@@ -330,7 +346,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
                 setLetterBounces((prev) => ({ ...prev, [platform.index]: 10 }));
                 lastLandedPlatform.current = platform.index;
                 // Play bump sound when letter starts bouncing
-                if (bumpAudioRef.current) {
+                if (bumpAudioRef.current && !sfxMuted) {
                   bumpAudioRef.current.currentTime = 0;
                   bumpAudioRef.current.play().catch((e) => console.error('Bump audio error:', e));
                 }
