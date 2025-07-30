@@ -138,34 +138,7 @@ export default function PersonalInfo() {
       ))}
       */}
 
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 1,
-          width: '100vw',
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'PixelGameFont, monospace',
-          fontSize: 32,
-          letterSpacing: 1,
-          color: '#fff',
-          textShadow: `
-            -2px -2px 0 #000,  
-            2px -2px 0 #000,   
-            -2px 2px 0 #000,   
-            2px 2px 0 #000,    
-            0px 2px 0 #000,    
-            2px 0px 0 #000,    
-            0px -2px 0 #000,   
-            -2px 0px 0 #000
-          `,
-        }}
-      >
-        <h1 style={{ marginBottom: 24 }}>Personal Info</h1>
-      </div>
+      
     </div>
   );
 }

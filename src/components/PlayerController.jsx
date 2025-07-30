@@ -100,6 +100,9 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
   const [letterBounces, setLetterBounces] = useState({});
   const [textBlinkingActive, setTextBlinkingActive] = useState(false);
   const [textBlink, setTextBlink] = useState(true);
+  // Add missing state for the additional text elements
+  const [showDots, setShowDots] = useState(false);
+  const [dots, setDots] = useState('');
 
   if (!window.__PLAYER_KEYS__) window.__PLAYER_KEYS__ = {};
   const keys = React.useMemo(() => ({ current: window.__PLAYER_KEYS__ }), []);
@@ -232,9 +235,24 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
     console.log('Text drop animation started');
   }, [textDrop, showText]);
 
+  // Add useEffect for dots animation
+  useEffect(() => {
+    if (!showDots) return;
+    
+    let dotCount = 0;
+    const interval = setInterval(() => {
+      dotCount = (dotCount + 1) % 4;
+      setDots('.'.repeat(dotCount));
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, [showDots]);
+
+  // Update the text blinking effect to show explore text during blinking, then dots after
   useEffect(() => {
     if (!showText || !textBlinkingActive) {
       setTextBlink(true);
+      setShowDots(false);
       return;
     }
     setTextBlink(true);
@@ -244,6 +262,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
     const timeout = setTimeout(() => {
       clearInterval(interval);
       setTextBlink(true);
+      setShowDots(true); // Show dots after blinking stops
     }, 2000);
     return () => {
       clearInterval(interval);
@@ -357,6 +376,94 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
                 currentlyStandingOnLetters.add(platform.index);
               }
               break;
+            }
+          }
+        }
+        
+        // Check for collisions when jumping upward (vy < 0) - hitting bottom of platforms
+        if (vy < 0) {
+          for (const platform of allPlatforms) {
+            // Skip letter platforms for bottom collision detection
+            if (platform.letter) continue;
+            
+            const playerLeft = nextX;
+            const playerRight = nextX + PLAYER_WIDTH;
+            const playerBottom = nextY + PLAYER_HEIGHT;
+            const playerTop = nextY;
+            const platformLeft = platform.x;
+            const platformRight = platform.x + platform.width;
+            const platformTop = platform.y;
+            const platformBottom = platform.y + platform.height;
+
+            if (
+              playerRight > platformLeft &&
+              playerLeft < platformRight &&
+              playerTop <= platformBottom &&
+              playerBottom >= platformBottom &&
+              playerTop >= platformTop
+            ) {
+              console.log(`Bottom collision detected with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+              nextY = platformBottom;
+              vy = 0;
+              break;
+            }
+          }
+        }
+        
+        // Check for side collisions (left and right sides of platforms)
+        for (const platform of allPlatforms) {
+          // Skip letter platforms for side collision detection
+          if (platform.letter) continue;
+          
+          const playerLeft = nextX;
+          const playerRight = nextX + PLAYER_WIDTH;
+          const playerBottom = nextY + PLAYER_HEIGHT;
+          const playerTop = nextY;
+          const platformLeft = platform.x;
+          const platformRight = platform.x + platform.width;
+          const platformTop = platform.y;
+          const platformBottom = platform.y + platform.height;
+
+          // Check if player overlaps with platform horizontally and vertically
+          if (
+            playerRight > platformLeft &&
+            playerLeft < platformRight &&
+            playerBottom > platformTop &&
+            playerTop < platformBottom
+          ) {
+            // Determine which side the collision is on
+            const leftOverlap = playerRight - platformLeft;
+            const rightOverlap = platformRight - playerLeft;
+            const topOverlap = playerBottom - platformTop;
+            const bottomOverlap = platformBottom - playerTop;
+            
+            // Find the smallest overlap to determine collision side
+            const overlaps = [
+              { side: 'left', value: leftOverlap },
+              { side: 'right', value: rightOverlap },
+              { side: 'top', value: topOverlap },
+              { side: 'bottom', value: bottomOverlap }
+            ];
+            
+            const smallestOverlap = overlaps.reduce((min, current) => 
+              current.value < min.value ? current : min
+            );
+            
+            // Handle collision based on which side has the smallest overlap
+            if (smallestOverlap.side === 'left') {
+              console.log(`Left side collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+              nextX = platformLeft - PLAYER_WIDTH;
+            } else if (smallestOverlap.side === 'right') {
+              console.log(`Right side collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+              nextX = platformRight;
+            } else if (smallestOverlap.side === 'top') {
+              console.log(`Top collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+              nextY = platformTop - PLAYER_HEIGHT;
+              vy = 0;
+            } else if (smallestOverlap.side === 'bottom') {
+              console.log(`Bottom collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+              nextY = platformBottom;
+              vy = 0;
             }
           }
         }
@@ -501,24 +608,65 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         scale={scale}
       />
       {showText && textDrop && (
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            width: '100%',
-            top: -100 + textY * scale,
-            textAlign: 'center',
-            pointerEvents: 'none',
-            zIndex: 10,
-          }}
-        >
-          {textString.split('').map((char, index) => (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              width: '100%',
+              top: -100 + textY * scale,
+              textAlign: 'center',
+              pointerEvents: 'none',
+              zIndex: 10,
+            }}
+          >
+            {textString.split('').map((char, index) => (
+              <span
+                key={`letter-${index}`}
+                style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  fontSize: 50 * scale,
+                  fontWeight: 'normal',
+                  color: '#fff',
+                  textShadow: `
+                    -2px -2px 0 #000,
+                    2px -2px 0 #000,
+                    -2px 2px 0 #000,
+                    2px 2px 0 #000,
+                    0px 2px 0 #000,
+                    2px 0px 0 #000,
+                    0px -2px 0 #000,
+                    -2px 0px 0 #000
+                  `,
+                  letterSpacing: `${2 * scale}px`,
+                  fontFamily: 'PixelGameFont, monospace',
+                  userSelect: 'none',
+                  opacity: textBlink ? 1 : 0,
+                  transform: `translateY(${letterBounces[index] ? letterBounces[index] * scale : 0}px)`,
+                  transition: 'transform 0.1s ease-in-out',
+                  minWidth: char === ' ' ? `${15 * scale}px` : 'auto',
+                }}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </div>
+          {/* [ Explore Here ] comes down with the main text, does not blink */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              width: '100%',
+              top: 50 + textY * scale,
+              textAlign: 'center',
+              pointerEvents: 'none',
+              zIndex: 10,
+            }}
+          >
             <span
-              key={`letter-${index}`}
               style={{
-                position: 'relative',
-                display: 'inline-block',
-                fontSize: 50 * scale,
+                fontSize: 20 * scale,
                 fontWeight: 'normal',
                 color: '#fff',
                 textShadow: `
@@ -531,18 +679,50 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
                   0px -2px 0 #000,
                   -2px 0px 0 #000
                 `,
-                letterSpacing: `${2 * scale}px`, // Normal letter spacing
                 fontFamily: 'PixelGameFont, monospace',
                 userSelect: 'none',
-                opacity: textBlink ? 1 : 0,
-                transform: `translateY(${letterBounces[index] ? letterBounces[index] * scale : 0}px)`,
-                transition: 'transform 0.1s ease-in-out',
-                minWidth: char === ' ' ? `${15 * scale}px` : 'auto', // Give spaces a minimum width (reduced)
               }}
             >
-              {char === ' ' ? '\u00A0' : char} {/* Replace spaces with non-breaking spaces */}
+              [ Explore Me ]
             </span>
-          ))}
+          </div>
+        </>
+      )}
+      
+      {/* Dots animation - only shows after blinking stops */}
+      {showText && textDrop && showDots && (
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            top: 40 + textY * scale,
+            textAlign: 'center',
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 50 * scale,
+              fontWeight: 'normal',
+              color: '#fff',
+              textShadow: `
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000,
+                0px 2px 0 #000,
+                2px 0px 0 #000,
+                0px -2px 0 #000,
+                -2px 0px 0 #000
+              `,
+              fontFamily: 'PixelGameFont, monospace',
+              userSelect: 'none',
+            }}
+          >
+            {dots}
+          </span>
         </div>
       )}
       {/*}
