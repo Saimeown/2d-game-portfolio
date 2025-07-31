@@ -110,6 +110,22 @@ export default function PersonalInfo() {
         }}
         draggable={false}
       />
+      {/* Billboard Building image at same y as sprite, right side */}
+      <img
+        src="/assets/BILLBOARD-BUILDING.png"
+        alt="Billboard Building"
+        style={{
+          position: 'absolute',
+          left: -530 + STANDEE_X * scale,
+          top: -460 + offsetY + STANDEE_Y * scale,
+          width: 170 * scale,
+          height: 250 * scale,
+          zIndex: 2,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
       <PlayerController
         leftRoute="/"
         rightRoute={null}
