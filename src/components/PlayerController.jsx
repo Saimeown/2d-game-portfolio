@@ -1,42 +1,44 @@
-import React, { useRef, useEffect, useState, useContext } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Sprite } from './Sprite.jsx';
-import PlayerPositionContext from '../PlayerPositionContext.js';
-import PlayerMovementContext from '../PlayerMovementContext.jsx';
-import { SoundEffectsContext } from '../MusicContext.js';
+import React, { useRef, useEffect, useState, useContext } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Sprite } from "./Sprite.jsx";
+import PlayerPositionContext from "../PlayerPositionContext.js";
+import PlayerMovementContext from "../PlayerMovementContext.jsx";
+import { SoundEffectsContext } from "../MusicContext.js";
+import { VIRTUAL_WIDTH, VIRTUAL_HEIGHT } from "../constants/gameConstants.js";
 
 const SPRITE_IDLE = [
-  '/assets/sprite/Idle/frame_1.png',
-  '/assets/sprite/Idle/frame_2.png',
-  '/assets/sprite/Idle/frame_3.png',
-  '/assets/sprite/Idle/frame_4.png',
+  "/assets/sprite/Idle/frame_1.png",
+  "/assets/sprite/Idle/frame_2.png",
+  "/assets/sprite/Idle/frame_3.png",
+  "/assets/sprite/Idle/frame_4.png",
 ];
 const SPRITE_RUN = [
-  '/assets/sprite/Jump/frame_8.png',
-  '/assets/sprite/Run/frame_2.png',
-  '/assets/sprite/Run/frame_3.png',
-  '/assets/sprite/Run/frame_4.png',
-  '/assets/sprite/Run/frame_5.png',
-  '/assets/sprite/Run/frame_6.png',
+  "/assets/sprite/Jump/frame_8.png",
+  "/assets/sprite/Run/frame_2.png",
+  "/assets/sprite/Run/frame_3.png",
+  "/assets/sprite/Run/frame_4.png",
+  "/assets/sprite/Run/frame_5.png",
+  "/assets/sprite/Run/frame_6.png",
 ];
 const SPRITE_JUMP = [
-  '/assets/sprite/Jump/frame_1.png',
-  '/assets/sprite/Jump/frame_2.png',
-  '/assets/sprite/Jump/frame_3.png',
-  '/assets/sprite/Jump/frame_4.png',
-  '/assets/sprite/Jump/frame_6.png',
-  '/assets/sprite/Jump/frame_7.png',
-  '/assets/sprite/Jump/frame_8.png',
+  "/assets/sprite/Jump/frame_1.png",
+  "/assets/sprite/Jump/frame_2.png",
+  "/assets/sprite/Jump/frame_3.png",
+  "/assets/sprite/Jump/frame_4.png",
+  "/assets/sprite/Jump/frame_6.png",
+  "/assets/sprite/Jump/frame_7.png",
+  "/assets/sprite/Jump/frame_8.png",
 ];
 
-const GAME_WIDTH = 740;
-const GAME_HEIGHT = 367;
-const GROUND_Y = 300;
-const GRAVITY = 0.36;
-const JUMP_VELOCITY = -8;
-const MOVE_SPEED = 1.7;
-const PLAYER_WIDTH = 35;
-const PLAYER_HEIGHT = 35;
+// Virtual game dimensions
+const GAME_WIDTH = VIRTUAL_WIDTH;
+const GAME_HEIGHT = VIRTUAL_HEIGHT;
+const GROUND_Y = 800;
+const GRAVITY = 0.8;
+const JUMP_VELOCITY = -20;
+const MOVE_SPEED = 4;
+const PLAYER_WIDTH = 80;
+const PLAYER_HEIGHT = 80;
 
 const ANIMATION_SPEEDS = {
   run: 120,
@@ -44,24 +46,23 @@ const ANIMATION_SPEEDS = {
   idle: 200,
 };
 
-function useWindowSize() {
-  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-  useEffect(() => {
-    const onResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-  return size;
-}
-
-export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, startAtLeft, platforms = [] }) {
+export function PlayerController({
+  leftRoute,
+  rightRoute,
+  showText,
+  fallOnLoad,
+  startAtLeft,
+  platforms = [],
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { y: sharedY, setY: setSharedY } = useContext(PlayerPositionContext);
   const { setIsMoving } = useContext(PlayerMovementContext);
   const { muted: sfxMuted } = useContext(SoundEffectsContext);
 
-  const isInitialRender = useRef(!fallOnLoad && rightRoute && location.pathname === rightRoute);
+  const isInitialRender = useRef(
+    !fallOnLoad && rightRoute && location.pathname === rightRoute
+  );
   const lastLandedPlatform = useRef(null); // Track last landed platform index
 
   let initialX;
@@ -91,18 +92,21 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
     vx: 0,
     vy: 0,
     onGround: !fallOnLoad,
-    facing: (!fallOnLoad && rightRoute && location.pathname === rightRoute) ? 'right' : 'left',
-    state: 'idle',
+    facing:
+      !fallOnLoad && rightRoute && location.pathname === rightRoute
+        ? "right"
+        : "left",
+    state: "idle",
     frame: 0,
   });
   const [textDrop, setTextDrop] = useState(false);
-  const [textY, setTextY] = useState(-80);
+  const [textY, setTextY] = useState(-200);
   const [letterBounces, setLetterBounces] = useState({});
   const [textBlinkingActive, setTextBlinkingActive] = useState(false);
   const [textBlink, setTextBlink] = useState(true);
   // Add missing state for the additional text elements
   const [showDots, setShowDots] = useState(false);
-  const [dots, setDots] = useState('');
+  const [dots, setDots] = useState("");
 
   if (!window.__PLAYER_KEYS__) window.__PLAYER_KEYS__ = {};
   const keys = React.useMemo(() => ({ current: window.__PLAYER_KEYS__ }), []);
@@ -111,7 +115,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
   const animationState = useRef({
     frame: 0,
     lastFrameTime: performance.now(),
-    lastState: 'idle',
+    lastState: "idle",
   });
   const landedOnce = useRef(false);
   const jumpAudioRef = useRef(null);
@@ -120,14 +124,13 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
   const runningRef = useRef(false);
 
   useEffect(() => {
-    jumpAudioRef.current = new Audio('/assets/jump-sfx.mp3');
+    jumpAudioRef.current = new Audio("/assets/jump-sfx.mp3");
     jumpAudioRef.current.volume = 0.7;
-    runAudioRef.current = new Audio('/assets/run-sfx.mp3');
+    runAudioRef.current = new Audio("/assets/run-sfx.mp3");
     runAudioRef.current.volume = 0.7;
     runAudioRef.current.loop = true;
-    bumpAudioRef.current = new Audio('/public/assets/bump-sfx.wav');
+    bumpAudioRef.current = new Audio("/public/assets/bump-sfx.wav");
     bumpAudioRef.current.volume = 0.8;
-    console.log('Audio initialized');
   }, []);
 
   // Handle SFX muting - stop run audio immediately when muted
@@ -144,7 +147,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
       const key = e.key.toLowerCase();
       if (!window.__PLAYER_KEYS__[key]) {
         window.__PLAYER_KEYS__[key] = true;
-        if (key === 'arrowup' || key === 'w' || key === ' ') {
+        if (key === "arrowup" || key === "w" || key === " ") {
           jumpPressed.current = true;
         }
       }
@@ -152,46 +155,48 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
     const handleUp = (e) => {
       const key = e.key.toLowerCase();
       window.__PLAYER_KEYS__[key] = false;
-      if (key === 'arrowup' || key === 'w' || key === ' ') {
+      if (key === "arrowup" || key === "w" || key === " ") {
         jumpPressed.current = false;
       }
     };
-    window.addEventListener('keydown', handleDown);
-    window.addEventListener('keyup', handleUp);
+    window.addEventListener("keydown", handleDown);
+    window.addEventListener("keyup", handleUp);
     return () => {
-      window.removeEventListener('keydown', handleDown);
-      window.removeEventListener('keyup', handleUp);
+      window.removeEventListener("keydown", handleDown);
+      window.removeEventListener("keyup", handleUp);
     };
   }, []);
 
   // Define text platforms
   const textString = "START YOUR QUEST >>>";
-  const fontSize = 50;
-  const letterSpacing = 2; // Normal spacing between letters
-  const spaceWidth = fontSize * 0.3; // Width for space characters (reduced)
-  const letterWidth = fontSize * 0.4; // Width for regular characters
-  
+  const fontSize = 120; // Larger for virtual resolution
+  const letterSpacing = 5;
+  const spaceWidth = fontSize * 0.3;
+  const letterWidth = fontSize * 0.4;
+
   // Calculate positions taking into account different widths for spaces vs letters
   let currentX = 0;
-  const charPositions = textString.split('').map((char, index) => {
-    const width = char === ' ' ? spaceWidth : letterWidth;
-    const x = currentX + 5;
+  const charPositions = textString.split("").map((char, index) => {
+    const width = char === " " ? spaceWidth : letterWidth;
+    const x = currentX + 10;
     currentX += width + letterSpacing;
     return { char, x, width, index };
   });
-  
+
   const totalTextWidth = currentX - letterSpacing;
   const textXStart = (GAME_WIDTH - totalTextWidth) / 2;
-  
+
   const textPlatforms = textDrop
-    ? charPositions.filter(charData => charData.char !== ' ').map((charData) => ({
-        x: textXStart + charData.x,
-        y: textY - 20,
-        width: charData.width,
-        height: fontSize * 0.8,
-        letter: charData.char,
-        index: charData.index,
-      }))
+    ? charPositions
+        .filter((charData) => charData.char !== " ")
+        .map((charData) => ({
+          x: textXStart + charData.x,
+          y: textY - 50,
+          width: charData.width,
+          height: fontSize * 0.8,
+          letter: charData.char,
+          index: charData.index,
+        }))
     : [];
 
   // Handle letter bounce animation
@@ -212,16 +217,16 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
 
   useEffect(() => {
     if (!showText || !textDrop) {
-      setTextY(-80);
+      setTextY(-200);
       setTextBlinkingActive(false);
       return;
     }
     let running = true;
     let vy = 0;
-    let y = -80;
-    const targetY = GAME_HEIGHT / 2 - 40;
+    let y = -200;
+    const targetY = GAME_HEIGHT / 2 - 100;
     function animate() {
-      vy += 0.15;
+      vy += 0.4;
       y += vy;
       if (y > targetY) {
         y = targetY;
@@ -232,19 +237,18 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
       if (running) requestAnimationFrame(animate);
     }
     animate();
-    console.log('Text drop animation started');
   }, [textDrop, showText]);
 
   // Add useEffect for dots animation
   useEffect(() => {
     if (!showDots) return;
-    
+
     let dotCount = 0;
     const interval = setInterval(() => {
       dotCount = (dotCount + 1) % 4;
-      setDots('.'.repeat(dotCount));
+      setDots(".".repeat(dotCount));
     }, 500);
-    
+
     return () => clearInterval(interval);
   }, [showDots]);
 
@@ -275,24 +279,26 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
       setPlayer((prev) => {
         let { x, y, vx, vy, facing, onGround } = prev;
         let moving = false;
-        if (keys.current['arrowleft'] || keys.current['a']) {
+        if (keys.current["arrowleft"] || keys.current["a"]) {
           vx = -MOVE_SPEED;
-          facing = 'left';
+          facing = "left";
           moving = true;
-        } else if (keys.current['arrowright'] || keys.current['d']) {
+        } else if (keys.current["arrowright"] || keys.current["d"]) {
           vx = MOVE_SPEED;
-          facing = 'right';
+          facing = "right";
           moving = true;
         } else {
           vx = 0;
         }
-        
+
         // Update movement context
         setIsMoving(moving && prev.onGround);
         if (moving && prev.onGround) {
           if (!runningRef.current && runAudioRef.current && !sfxMuted) {
             runAudioRef.current.currentTime = 0;
-            runAudioRef.current.play().catch((e) => console.error('Run audio error:', e));
+            runAudioRef.current
+              .play()
+              .catch((e) => console.error("Run audio error:", e));
             runningRef.current = true;
           }
         } else {
@@ -303,12 +309,18 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
           }
         }
         let nextOnGround = onGround;
-        if ((keys.current['arrowup'] || keys.current['w'] || keys.current[' ']) && onGround && jumpPressed.current) {
+        if (
+          (keys.current["arrowup"] || keys.current["w"] || keys.current[" "]) &&
+          onGround &&
+          jumpPressed.current
+        ) {
           vy = JUMP_VELOCITY;
           nextOnGround = false;
           if (jumpAudioRef.current && !sfxMuted) {
             jumpAudioRef.current.currentTime = 0;
-            jumpAudioRef.current.play().catch((e) => console.error('Jump audio error:', e));
+            jumpAudioRef.current
+              .play()
+              .catch((e) => console.error("Jump audio error:", e));
           }
           if (runAudioRef.current) {
             runAudioRef.current.pause();
@@ -318,7 +330,12 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         }
         vy += GRAVITY;
         let nextX = x + vx;
-        if (!fallOnLoad && rightRoute && location.pathname === rightRoute && isInitialRender.current) {
+        if (
+          !fallOnLoad &&
+          rightRoute &&
+          location.pathname === rightRoute &&
+          isInitialRender.current
+        ) {
           nextX = 0;
           isInitialRender.current = false;
         }
@@ -334,7 +351,7 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
         let landedOnPlatform = false;
         let currentLandedPlatform = null;
         let currentlyStandingOnLetters = new Set(); // Track which letters player is currently on
-        
+
         if (vy > 0) {
           for (const platform of allPlatforms) {
             const playerLeft = nextX;
@@ -346,30 +363,30 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             const platformTop = platform.y;
             const platformBottom = platform.y + platform.height;
 
-            console.log(`Player: x=${nextX.toFixed(2)}, y=${nextY.toFixed(2)}, bottom=${playerBottom.toFixed(2)}`);
-            console.log(`Platform ${platform.letter ? `Letter ${platform.letter}` : `Grass ${platforms.indexOf(platform)}`}: x=${platform.x}, y=${platform.y}, top=${platformTop}, bottom=${platformBottom}`);
-
             if (
               playerRight > platformLeft &&
               playerLeft < platformRight &&
               playerTop <= platformTop &&
               playerBottom >= platformTop &&
-              playerBottom <= platformBottom + 10
+              playerBottom <= platformBottom + 20
             ) {
-              console.log(`Collision detected with ${platform.letter ? `letter ${platform.letter}` : `grass platform ${platforms.indexOf(platform)}`} at x=${platform.x}, y=${platform.y}`);
               nextY = platformTop - PLAYER_HEIGHT;
               vy = 0;
               landedOnPlatform = true;
               nextOnGround = true;
-              if (platform.letter && lastLandedPlatform.current !== platform.index) {
-                setLetterBounces((prev) => ({ ...prev, [platform.index]: 10 }));
+              if (
+                platform.letter &&
+                lastLandedPlatform.current !== platform.index
+              ) {
+                setLetterBounces((prev) => ({ ...prev, [platform.index]: 25 }));
                 lastLandedPlatform.current = platform.index;
                 // Play bump sound when letter starts bouncing
                 if (bumpAudioRef.current && !sfxMuted) {
                   bumpAudioRef.current.currentTime = 0;
-                  bumpAudioRef.current.play().catch((e) => console.error('Bump audio error:', e));
+                  bumpAudioRef.current
+                    .play()
+                    .catch((e) => console.error("Bump audio error:", e));
                 }
-                console.log(`Bounce triggered for letter ${platform.letter} at index ${platform.index}`);
               }
               currentLandedPlatform = platform.index;
               if (platform.letter) {
@@ -379,13 +396,13 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             }
           }
         }
-        
+
         // Check for collisions when jumping upward (vy < 0) - hitting bottom of platforms
         if (vy < 0) {
           for (const platform of allPlatforms) {
             // Skip letter platforms for bottom collision detection
             if (platform.letter) continue;
-            
+
             const playerLeft = nextX;
             const playerRight = nextX + PLAYER_WIDTH;
             const playerBottom = nextY + PLAYER_HEIGHT;
@@ -402,19 +419,18 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
               playerBottom >= platformBottom &&
               playerTop >= platformTop
             ) {
-              console.log(`Bottom collision detected with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
               nextY = platformBottom;
               vy = 0;
               break;
             }
           }
         }
-        
+
         // Check for side collisions (left and right sides of platforms)
         for (const platform of allPlatforms) {
           // Skip letter platforms for side collision detection
           if (platform.letter) continue;
-          
+
           const playerLeft = nextX;
           const playerRight = nextX + PLAYER_WIDTH;
           const playerBottom = nextY + PLAYER_HEIGHT;
@@ -436,32 +452,28 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             const rightOverlap = platformRight - playerLeft;
             const topOverlap = playerBottom - platformTop;
             const bottomOverlap = platformBottom - playerTop;
-            
+
             // Find the smallest overlap to determine collision side
             const overlaps = [
-              { side: 'left', value: leftOverlap },
-              { side: 'right', value: rightOverlap },
-              { side: 'top', value: topOverlap },
-              { side: 'bottom', value: bottomOverlap }
+              { side: "left", value: leftOverlap },
+              { side: "right", value: rightOverlap },
+              { side: "top", value: topOverlap },
+              { side: "bottom", value: bottomOverlap },
             ];
-            
-            const smallestOverlap = overlaps.reduce((min, current) => 
+
+            const smallestOverlap = overlaps.reduce((min, current) =>
               current.value < min.value ? current : min
             );
-            
+
             // Handle collision based on which side has the smallest overlap
-            if (smallestOverlap.side === 'left') {
-              console.log(`Left side collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+            if (smallestOverlap.side === "left") {
               nextX = platformLeft - PLAYER_WIDTH;
-            } else if (smallestOverlap.side === 'right') {
-              console.log(`Right side collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+            } else if (smallestOverlap.side === "right") {
               nextX = platformRight;
-            } else if (smallestOverlap.side === 'top') {
-              console.log(`Top collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+            } else if (smallestOverlap.side === "top") {
               nextY = platformTop - PLAYER_HEIGHT;
               vy = 0;
-            } else if (smallestOverlap.side === 'bottom') {
-              console.log(`Bottom collision with grass platform ${platforms.indexOf(platform)} at x=${platform.x}, y=${platform.y}`);
+            } else if (smallestOverlap.side === "bottom") {
               nextY = platformBottom;
               vy = 0;
             }
@@ -494,9 +506,11 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
           const newBounces = { ...prev };
           Object.keys(newBounces).forEach((index) => {
             const indexNum = parseInt(index);
-            if (!currentlyStandingOnLetters.has(indexNum) && newBounces[index] > 0) {
+            if (
+              !currentlyStandingOnLetters.has(indexNum) &&
+              newBounces[index] > 0
+            ) {
               newBounces[index] = 0; // Stop bouncing immediately
-              console.log(`Stopped bouncing for letter at index ${index}`);
             }
           });
           return newBounces;
@@ -542,22 +556,34 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
             setTimeout(() => navigate(rightRoute), 0);
           }
         }
-        let nextState = nextOnGround ? (vx !== 0 ? 'run' : 'idle') : 'jump';
+        let nextState = nextOnGround ? (vx !== 0 ? "run" : "idle") : "jump";
         if (nextState !== animationState.current.lastState) {
           animationState.current.frame = 0;
           animationState.current.lastFrameTime = now;
           animationState.current.lastState = nextState;
         }
         const animationSpeed = ANIMATION_SPEEDS[nextState];
-        const frameCount = nextState === 'run' ? SPRITE_RUN.length : nextState === 'jump' ? SPRITE_JUMP.length : SPRITE_IDLE.length;
+        const frameCount =
+          nextState === "run"
+            ? SPRITE_RUN.length
+            : nextState === "jump"
+            ? SPRITE_JUMP.length
+            : SPRITE_IDLE.length;
         if (now - animationState.current.lastFrameTime >= animationSpeed) {
-          animationState.current.frame = (animationState.current.frame + 1) % frameCount;
-          animationState.current.lastFrameTime = now - (now - animationState.current.lastFrameTime - animationSpeed);
+          animationState.current.frame =
+            (animationState.current.frame + 1) % frameCount;
+          animationState.current.lastFrameTime =
+            now - (now - animationState.current.lastFrameTime - animationSpeed);
         }
-        if (showText && !landedOnce.current && !prev.onGround && nextOnGround && nextY + PLAYER_HEIGHT >= GROUND_Y - 1) {
+        if (
+          showText &&
+          !landedOnce.current &&
+          !prev.onGround &&
+          nextOnGround &&
+          nextY + PLAYER_HEIGHT >= GROUND_Y - 2
+        ) {
           landedOnce.current = true;
           setTimeout(() => setTextDrop(true), 400);
-          console.log('Player landed, triggering text drop');
         }
         return {
           x: nextX,
@@ -573,62 +599,68 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
       raf.current = requestAnimationFrame(loop);
     }
     raf.current = requestAnimationFrame(loop);
-    console.log('Game loop started');
     return () => {
       cancelAnimationFrame(raf.current);
-      console.log('Game loop stopped');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, leftRoute, rightRoute, location.pathname, showText, setSharedY, fallOnLoad, sharedY, keys, platforms, textY, textDrop]);
-
-  const { width, height } = useWindowSize();
-  const scale = Math.min(width / GAME_WIDTH, height / GAME_HEIGHT);
-  const offsetY = (height - GAME_HEIGHT * scale) / 2;
-
-  console.log('Rendering PlayerController', { playerX: player.x, playerY: player.y, textDrop, textY, scale, offsetY });
+  }, [
+    navigate,
+    leftRoute,
+    rightRoute,
+    location.pathname,
+    showText,
+    setSharedY,
+    fallOnLoad,
+    sharedY,
+    keys,
+    platforms,
+    textY,
+    textDrop,
+    setIsMoving,
+    sfxMuted,
+  ]);
 
   return (
     <div
       style={{
-        position: 'absolute',
+        position: "absolute",
         left: 0,
-        top: offsetY,
-        width: '100vw',
-        height: GAME_HEIGHT * scale,
-        backgroundColor: 'rgba(0,0,0,0)',
-        pointerEvents: 'none',
+        top: 0,
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT,
+        pointerEvents: "none",
       }}
     >
       <Sprite
-        x={player.x * scale}
-        y={player.y * scale}
+        x={player.x}
+        y={player.y}
         facing={player.facing}
         state={player.state}
         frame={player.frame}
-        scale={scale}
       />
+
       {showText && textDrop && (
         <>
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: 0,
-              width: '100%',
-              top: -100 + textY * scale,
-              textAlign: 'center',
-              pointerEvents: 'none',
+              width: GAME_WIDTH,
+              top: textY - 100,
+              textAlign: "center",
+              pointerEvents: "none",
               zIndex: 10,
             }}
           >
-            {textString.split('').map((char, index) => (
+            {textString.split("").map((char, index) => (
               <span
                 key={`letter-${index}`}
                 style={{
-                  position: 'relative',
-                  display: 'inline-block',
-                  fontSize: 50 * scale,
-                  fontWeight: 'normal',
-                  color: '#fff',
+                  position: "relative",
+                  display: "inline-block",
+                  fontSize: fontSize,
+                  fontWeight: "normal",
+                  color: "#fff",
                   textShadow: `
                     -2px -2px 0 #000,
                     2px -2px 0 #000,
@@ -639,36 +671,38 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
                     0px -2px 0 #000,
                     -2px 0px 0 #000
                   `,
-                  letterSpacing: `${2 * scale}px`,
-                  fontFamily: 'PixelGameFont, monospace',
-                  userSelect: 'none',
+                  letterSpacing: `${letterSpacing}px`,
+                  fontFamily: "PixelGameFont, monospace",
+                  userSelect: "none",
                   opacity: textBlink ? 1 : 0,
-                  transform: `translateY(${letterBounces[index] ? letterBounces[index] * scale : 0}px)`,
-                  transition: 'transform 0.1s ease-in-out',
-                  minWidth: char === ' ' ? `${15 * scale}px` : 'auto',
+                  transform: `translateY(${
+                    letterBounces[index] ? letterBounces[index] : 0
+                  }px)`,
+                  transition: "transform 0.1s ease-in-out",
+                  minWidth: char === " " ? `${30}px` : "auto",
                 }}
               >
-                {char === ' ' ? '\u00A0' : char}
+                {char === " " ? "\u00A0" : char}
               </span>
             ))}
           </div>
-          {/* [ Explore Here ] comes down with the main text, does not blink */}
+
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: 0,
-              width: '100%',
-              top: 50 + textY * scale,
-              textAlign: 'center',
-              pointerEvents: 'none',
+              width: GAME_WIDTH,
+              top: textY + 50,
+              textAlign: "center",
+              pointerEvents: "none",
               zIndex: 10,
             }}
           >
             <span
               style={{
-                fontSize: 20 * scale,
-                fontWeight: 'normal',
-                color: '#fff',
+                fontSize: 50,
+                fontWeight: "normal",
+                color: "#fff",
                 textShadow: `
                   -2px -2px 0 #000,
                   2px -2px 0 #000,
@@ -679,8 +713,8 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
                   0px -2px 0 #000,
                   -2px 0px 0 #000
                 `,
-                fontFamily: 'PixelGameFont, monospace',
-                userSelect: 'none',
+                fontFamily: "PixelGameFont, monospace",
+                userSelect: "none",
               }}
             >
               [ Explore Me ]
@@ -688,61 +722,42 @@ export function PlayerController({ leftRoute, rightRoute, showText, fallOnLoad, 
           </div>
         </>
       )}
-      
-      {/* Dots animation - only shows after blinking stops */}
+
       {showText && textDrop && showDots && (
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             left: 0,
-            width: '100%',
-            top: 40 + textY * scale,
-            textAlign: 'center',
-            pointerEvents: 'none',
+            width: GAME_WIDTH,
+            top: textY + 40,
+            textAlign: "center",
+            pointerEvents: "none",
             zIndex: 10,
           }}
         >
           <span
             style={{
-              fontSize: 50 * scale,
-              fontWeight: 'normal',
-              color: '#fff',
+              fontSize: 120,
+              fontWeight: "normal",
+              color: "#fff",
               textShadow: `
                 -2px -2px 0 #000,
-                2px -2px 0 #000,
-                -2px 2px 0 #000,
-                2px 2px 0 #000,
-                0px 2px 0 #000,
-                2px 0px 0 #000,
-                0px -2px 0 #000,
-                -2px 0px 0 #000
+                  2px -2px 0 #000,
+                  -2px 2px 0 #000,
+                  2px 2px 0 #000,
+                  0px 2px 0 #000,
+                  2px 0px 0 #000,
+                  0px -2px 0 #000,
+                  -2px 0px 0 #000
               `,
-              fontFamily: 'PixelGameFont, monospace',
-              userSelect: 'none',
+              fontFamily: "PixelGameFont, monospace",
+              userSelect: "none",
             }}
           >
             {dots}
           </span>
         </div>
       )}
-      {/*}
-      {[...platforms, ...textPlatforms].map((platform, index) => (
-        <div
-          key={`platform-${index}`}
-          style={{
-            position: 'absolute',
-            left: platform.x * scale,
-            top: (platform.y + (platform.letter && letterBounces[platform.index] ? letterBounces[platform.index] : 0)) * scale + offsetY,
-            width: platform.width * scale,
-            height: platform.height * scale,
-            border: platform.letter ? '2px solid green' : '2px solid red',
-            backgroundColor: platform.letter ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)',
-            zIndex: 10,
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
-        */}
     </div>
   );
 }

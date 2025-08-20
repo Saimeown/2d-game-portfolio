@@ -1,50 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { GameContainer } from '../components/GameContainer.jsx';
 import { Header } from '../components/Header.jsx';
 import { PlayerController } from '../components/PlayerController.jsx';
+import { VIRTUAL_WIDTH, VIRTUAL_HEIGHT } from '../constants/gameConstants.js';
 
 export default function PersonalInfo() {
-  const [scale, setScale] = useState(1);
-  useEffect(() => {
-    function handleResize() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      setScale(Math.min(width / 740, height / 367));
-    }
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Use virtual coordinates directly
+  const STANDEE_X = 1500;
+  const STANDEE_Y = 800 - 120; // 680
 
-  // Standee position: x = 600 (right side), y = ground level
-  const STANDEE_X = 600;
-  const STANDEE_Y = 300 - 60; // 60 is standee height, adjust if needed
-
-  // Center vertically using same offset as PlayerController
-  const offsetY = (window.innerHeight - 367 * scale) / 2;
-
-  // Example: One grass platform in the middle
+  // Example platforms using virtual coordinates
   const grassPlatforms = [
     {
-      x: 140, // horizontal position (adjust as needed)
-      y: 247, // vertical position (adjust as needed)
-      width: 120, // width of the platform
-      height: 3, // height of the platform
+      x: 145, // horizontal position
+      y: 649, // vertical position  
+      width: 300, // width of the platform
+      height: 15, // height of the platform
     },
   ];
 
   return (
-    <div
-      style={{
-        width: '100vw',
-        height: '100vh',
-        position: 'fixed',
-        inset: 0,
-        overflow: 'hidden',
-        minWidth: 0,
-        minHeight: 0,
-      }}
-    >
+    <GameContainer>
       <Header />
+      
+      {/* Background Video */}
       <video
         autoPlay
         loop
@@ -54,78 +33,92 @@ export default function PersonalInfo() {
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100vw',
-          height: '100vh',
+          width: VIRTUAL_WIDTH,
+          height: VIRTUAL_HEIGHT,
           objectFit: 'cover',
           zIndex: 0,
           pointerEvents: 'none',
         }}
         src="src/assets/background-image.mp4"
       />
-      {/* Store image */}
-      <img
-        src="public/assets/STORE.png"
-        alt="Store"
-        style={{
-          position: 'absolute',
-          left: -1680 + STANDEE_X * scale,
-          top: -60 + offsetY + STANDEE_Y * scale,
-          width: 80 * scale,
-          height: 80 * scale,
-          zIndex: 2,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-        draggable={false}
-      />
-      {/* Standee image at same y as sprite, right side */}
-      <img
-        src="/assets/standee-rightArrow.png"
-        alt="Standee"
-        style={{
-          position: 'absolute',
-          left: -1460 + STANDEE_X * scale,
-          top: 70 + offsetY + STANDEE_Y * scale,
-          width: 30 * scale,
-          height: 30 * scale,
-          zIndex: 2,
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-        draggable={false}
-      />
-      {/* Billboard image at same y as sprite, right side */}
+      
+   
+      
+   
+      
+      {/* Billboard image */}
       <img
         src="/assets/BILLBOARD.png"
         alt="Billboard"
         style={{
           position: 'absolute',
-          left: -1230 + STANDEE_X * scale,
-          top: -240 + offsetY + STANDEE_Y * scale,
-          width: 150 * scale,
-          height: 150 * scale,
+          left: 100,
+          top: STANDEE_Y - 280,
+          width: 375,
+          height: 375,
           zIndex: 2,
           pointerEvents: 'none',
           userSelect: 'none',
         }}
         draggable={false}
       />
-      {/* Billboard Building image at same y as sprite, right side */}
-      <img
-        src="/assets/BILLBOARD-BUILDING.png"
-        alt="Billboard Building"
+      
+      {/* Under Development Text */}
+      <div
         style={{
           position: 'absolute',
-          left: -530 + STANDEE_X * scale,
-          top: -460 + offsetY + STANDEE_Y * scale,
-          width: 170 * scale,
-          height: 250 * scale,
-          zIndex: 2,
+          left: 0,
+          width: VIRTUAL_WIDTH,
+          top: VIRTUAL_HEIGHT / 2 - 100,
+          textAlign: 'center',
           pointerEvents: 'none',
-          userSelect: 'none',
+          zIndex: 10,
         }}
-        draggable={false}
-      />
+      >
+        <div
+          style={{
+            fontSize: 80,
+            fontWeight: 'bold',
+            color: '#fff',
+            textShadow: `
+              -2px -2px 0 #000,
+                  2px -2px 0 #000,
+                  -2px 2px 0 #000,
+                  2px 2px 0 #000,
+                  0px 2px 0 #000,
+                  2px 0px 0 #000,
+                  0px -2px 0 #000,
+                  -2px 0px 0 #000
+            `,
+            fontFamily: 'PixelGameFont, monospace',
+            userSelect: 'none',
+            marginBottom: '20px',
+          }}
+        >
+          🚧🚧🚧
+        </div>
+        <div
+          style={{
+            fontSize: 40,
+            fontWeight: 'normal',
+            color: '#fff',
+            textShadow: `
+              -2px -2px 0 #000,
+                  2px -2px 0 #000,
+                  -2px 2px 0 #000,
+                  2px 2px 0 #000,
+                  0px 2px 0 #000,
+                  2px 0px 0 #000,
+                  0px -2px 0 #000,
+                  -2px 0px 0 #000
+            `,
+            fontFamily: 'PixelGameFont, monospace',
+            userSelect: 'none',
+          }}
+        >
+        </div>
+      </div>
+      
       <PlayerController
         leftRoute="/"
         rightRoute={null}
@@ -134,27 +127,6 @@ export default function PersonalInfo() {
         startAtLeft={true}
         platforms={grassPlatforms}
       />
-
-      {/*
-      {grassPlatforms.map((platform, idx) => (
-        <div
-          key={idx}
-          style={{
-            position: 'absolute',
-            left: platform.x * scale,
-            top: platform.y * scale + offsetY,
-            width: platform.width * scale,
-            height: platform.height * scale,
-            background: 'rgba(0,255,0,0.3)',
-            border: '2px solid green',
-            zIndex: 10,
-            pointerEvents: 'none',
-          }}
-        />
-      ))}
-      */}
-
-      
-    </div>
+    </GameContainer>
   );
 }

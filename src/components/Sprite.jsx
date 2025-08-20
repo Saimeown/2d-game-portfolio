@@ -24,9 +24,9 @@ const SPRITE_JUMP = [
   '/assets/sprite/Jump/frame_8.png',
 ];
 
-const PLAYER_WIDTH = 35;
-const PLAYER_HEIGHT = 35;
-const GROUND_Y = 300;
+const PLAYER_WIDTH = 80;
+const PLAYER_HEIGHT = 80;
+const GROUND_Y = 800;
 
 function preloadImages(srcArray) {
   return Promise.all(
@@ -63,13 +63,24 @@ function useImages(srcArr) {
   return { images, loaded };
 }
 
-export function Sprite({ x, y, facing, state, frame, scale }) {
+export function Sprite({ x, y, facing, state, frame }) {
   const { images: idleImgs, loaded: idleLoaded } = useImages(SPRITE_IDLE);
   const { images: runImgs, loaded: runLoaded } = useImages(SPRITE_RUN);
   const { images: jumpImgs, loaded: jumpLoaded } = useImages(SPRITE_JUMP);
 
   if (!idleLoaded || !runLoaded || !jumpLoaded) {
-    return <div style={{ position: 'absolute', left: x, top: y, width: PLAYER_WIDTH * scale, height: PLAYER_HEIGHT * scale, backgroundColor: 'red' }} />;
+    return (
+      <div 
+        style={{ 
+          position: 'absolute', 
+          left: x, 
+          top: y, 
+          width: PLAYER_WIDTH, 
+          height: PLAYER_HEIGHT, 
+          backgroundColor: 'red' 
+        }} 
+      />
+    );
   }
 
   let img = null;
@@ -85,9 +96,9 @@ export function Sprite({ x, y, facing, state, frame, scale }) {
 
   if (!img) return null;
 
-  // Calculate shadow properties based on height above ground
-  const heightAboveGround = GROUND_Y - (y / scale + PLAYER_HEIGHT);
-  const maxHeight = 100;
+  // Calculate shadow properties
+  const heightAboveGround = GROUND_Y - (y + PLAYER_HEIGHT);
+  const maxHeight = 200;
   const shadowOpacity = Math.max(0.2, 0.3 - heightAboveGround / maxHeight);
   const shadowScale = Math.max(0.4, 0.8 - heightAboveGround / maxHeight);
 
@@ -97,10 +108,10 @@ export function Sprite({ x, y, facing, state, frame, scale }) {
       <div
         style={{
           position: 'absolute',
-          left: x + (PLAYER_WIDTH * scale * 0.5),
-          top: GROUND_Y * scale,
-          width: PLAYER_WIDTH * scale * 0.8 * shadowScale,
-          height: PLAYER_HEIGHT * scale * 0.3 * shadowScale,
+          left: x + (PLAYER_WIDTH * 0.5),
+          top: GROUND_Y,
+          width: PLAYER_WIDTH * 0.8 * shadowScale,
+          height: PLAYER_HEIGHT * 0.3 * shadowScale,
           backgroundColor: `rgba(0, 0, 0, ${shadowOpacity})`,
           borderRadius: '50%',
           zIndex: 1,
@@ -116,8 +127,8 @@ export function Sprite({ x, y, facing, state, frame, scale }) {
           position: 'absolute',
           left: x,
           top: y,
-          width: PLAYER_WIDTH * scale,
-          height: PLAYER_HEIGHT * scale,
+          width: PLAYER_WIDTH,
+          height: PLAYER_HEIGHT,
           imageRendering: 'pixelated',
           transform: facing === 'left' ? 'scaleX(-1)' : 'none',
           zIndex: 2,
