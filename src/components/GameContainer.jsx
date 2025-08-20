@@ -58,7 +58,7 @@ export function GameContainer({ children }) {
           top: viewport.offsetY,
           width: viewport.width,
           height: viewport.height,
-          transform: 'translateZ(0)', // Force hardware acceleration
+          transform: 'translateZ(0)', 
         }}
       >
         <div

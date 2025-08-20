@@ -26,7 +26,6 @@ export function Platforms({ scale = 1 }) {
             pointerEvents: 'none',
             userSelect: 'none',
             display: 'block',
-            // No border or background for normal appearance
           }}
           draggable={false}
           onError={e => {

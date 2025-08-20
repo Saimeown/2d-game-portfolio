@@ -266,7 +266,7 @@ export function PlayerController({
     const timeout = setTimeout(() => {
       clearInterval(interval);
       setTextBlink(true);
-      setShowDots(true); // Show dots after blinking stops
+      setShowDots(true); 
     }, 2000);
     return () => {
       clearInterval(interval);

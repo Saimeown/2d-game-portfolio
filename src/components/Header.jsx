@@ -54,7 +54,7 @@ export function Header({ player, jumpPressed, textDrop, landedOnce }) {
         style={{
           position: 'absolute',
           top: 30,
-          right: 140, // 70px to the left of the music mute button
+          right: 140, 
           zIndex: 100,
           background: isMoving ? 'rgba(255, 255, 255, 1)' : 'rgba(255,255,255,1)',
           borderRadius: '50%',
