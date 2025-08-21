@@ -5,17 +5,15 @@ import { PlayerController } from '../components/PlayerController.jsx';
 import { VIRTUAL_WIDTH, VIRTUAL_HEIGHT } from '../constants/gameConstants.js';
 
 export default function PersonalInfo() {
-  // Use virtual coordinates directly
   const STANDEE_X = 1500;
-  const STANDEE_Y = 800 - 120; // 680
+  const STANDEE_Y = 800 - 120;
 
-  // Example platforms using virtual coordinates
   const grassPlatforms = [
     {
-      x: 145, // horizontal position
-      y: 649, // vertical position  
-      width: 300, // width of the platform
-      height: 15, // height of the platform
+      x: 145,
+      y: 649,  
+      width: 300,
+      height: 15,
     },
   ];
 
@@ -23,7 +21,6 @@ export default function PersonalInfo() {
     <GameContainer>
       <Header />
       
-      {/* Background Video */}
       <video
         autoPlay
         loop
@@ -42,11 +39,6 @@ export default function PersonalInfo() {
         src="src/assets/background-image.mp4"
       />
       
-   
-      
-   
-      
-      {/* Billboard image */}
       <img
         src="/assets/BILLBOARD.png"
         alt="Billboard"
@@ -63,7 +55,6 @@ export default function PersonalInfo() {
         draggable={false}
       />
       
-      {/* Under Development Text */}
       <div
         style={{
           position: 'absolute',

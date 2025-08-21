@@ -8,9 +8,24 @@ export function Header({ player, jumpPressed, textDrop, landedOnce }) {
   const { isMoving } = useContext(PlayerMovementContext);
   return (
     <>
-      {/* Music Mute/unmute button */}
       <button
-        onClick={toggleMute}
+        onClick={(e) => {
+          toggleMute();
+          e.target.blur();
+          setTimeout(() => {
+            if (window.__PLAYER_KEYS__) {
+              Object.keys(window.__PLAYER_KEYS__).forEach(key => {
+                window.__PLAYER_KEYS__[key] = false;
+              });
+            }
+            window.focus();
+            document.body.focus();
+          }, 0);
+        }}
+        onKeyDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         style={{
           position: 'absolute',
           top: 30,
@@ -28,28 +43,47 @@ export function Header({ player, jumpPressed, textDrop, landedOnce }) {
           fontSize: 22,
           pointerEvents: 'auto',
           border: '2px solid #000',
+          outline: 'none',
         }}
         aria-label={muted ? 'Unmute music' : 'Mute music'}
+        tabIndex={-1}
       >
         {muted ? (
           <img
             src="/assets/header/mute.png"
             alt="Muted"
-            style={{ width: 40, height: 40, objectFit: 'contain' }}
+            style={{ width: 35, height: 35, objectFit: 'contain' }}
             draggable={false}
           />
         ) : (
           <img
             src="/assets/header/unmute.png"
             alt="Unmuted"
-            style={{ width: 40, height: 40, objectFit: 'contain' }}
+            style={{ width: 35, height: 35, objectFit: 'contain' }}
             draggable={false}
           />
         )}
       </button>
-      {/* SFX Mute/unmute button */}
       <button
-        onClick={isMoving ? undefined : toggleSfxMute}
+        onClick={(e) => {
+          if (!isMoving) {
+            toggleSfxMute();
+            e.target.blur();
+            setTimeout(() => {
+              if (window.__PLAYER_KEYS__) {
+                Object.keys(window.__PLAYER_KEYS__).forEach(key => {
+                  window.__PLAYER_KEYS__[key] = false;
+                });
+              }
+              window.focus();
+              document.body.focus();
+            }, 0);
+          }
+        }}
+        onKeyDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         disabled={isMoving}
         style={{
           position: 'absolute',
@@ -69,8 +103,10 @@ export function Header({ player, jumpPressed, textDrop, landedOnce }) {
           pointerEvents: 'auto',
           border: '2px solid #000',
           opacity: isMoving ? 0.5 : 1,
+          outline: 'none',
         }}
         aria-label={sfxMuted ? 'Unmute sound effects' : 'Mute sound effects'}
+        tabIndex={-1}
       >
         {sfxMuted ? (
           <img
@@ -88,7 +124,6 @@ export function Header({ player, jumpPressed, textDrop, landedOnce }) {
           />
         )}
       </button>
-      {/* State indicator */}
       {player && (
         <div
           style={{

@@ -5,7 +5,6 @@ const MusicContext = React.createContext({
   toggleMute: () => {},
 });
 
-// New context for sound effects mute state
 const SoundEffectsContext = React.createContext({
   muted: false,
   toggleMute: () => {},

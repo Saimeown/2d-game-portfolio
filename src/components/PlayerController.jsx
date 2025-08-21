@@ -30,12 +30,11 @@ const SPRITE_JUMP = [
   "/assets/sprite/Jump/frame_8.png",
 ];
 
-// Virtual game dimensions
 const GAME_WIDTH = VIRTUAL_WIDTH;
 const GAME_HEIGHT = VIRTUAL_HEIGHT;
 const GROUND_Y = 800;
 const GRAVITY = 0.8;
-const JUMP_VELOCITY = -20;
+const JUMP_VELOCITY = -17;
 const MOVE_SPEED = 4;
 const PLAYER_WIDTH = 80;
 const PLAYER_HEIGHT = 80;
@@ -104,7 +103,6 @@ export function PlayerController({
   const [letterBounces, setLetterBounces] = useState({});
   const [textBlinkingActive, setTextBlinkingActive] = useState(false);
   const [textBlink, setTextBlink] = useState(true);
-  // Add missing state for the additional text elements
   const [showDots, setShowDots] = useState(false);
   const [dots, setDots] = useState("");
 
@@ -133,7 +131,6 @@ export function PlayerController({
     bumpAudioRef.current.volume = 0.8;
   }, []);
 
-  // Handle SFX muting - stop run audio immediately when muted
   useEffect(() => {
     if (sfxMuted && runAudioRef.current && runningRef.current) {
       runAudioRef.current.pause();
@@ -167,14 +164,12 @@ export function PlayerController({
     };
   }, []);
 
-  // Define text platforms
   const textString = "START YOUR QUEST >>>";
-  const fontSize = 120; // Larger for virtual resolution
+  const fontSize = 120;
   const letterSpacing = 5;
   const spaceWidth = fontSize * 0.3;
   const letterWidth = fontSize * 0.4;
 
-  // Calculate positions taking into account different widths for spaces vs letters
   let currentX = 0;
   const charPositions = textString.split("").map((char, index) => {
     const width = char === " " ? spaceWidth : letterWidth;
@@ -199,7 +194,6 @@ export function PlayerController({
         }))
     : [];
 
-  // Handle letter bounce animation
   useEffect(() => {
     if (!textDrop || !textBlinkingActive) return;
     const bounceTimers = {};
@@ -239,7 +233,6 @@ export function PlayerController({
     animate();
   }, [textDrop, showText]);
 
-  // Add useEffect for dots animation
   useEffect(() => {
     if (!showDots) return;
 
@@ -252,7 +245,6 @@ export function PlayerController({
     return () => clearInterval(interval);
   }, [showDots]);
 
-  // Update the text blinking effect to show explore text during blinking, then dots after
   useEffect(() => {
     if (!showText || !textBlinkingActive) {
       setTextBlink(true);
@@ -291,7 +283,6 @@ export function PlayerController({
           vx = 0;
         }
 
-        // Update movement context
         setIsMoving(moving && prev.onGround);
         if (moving && prev.onGround) {
           if (!runningRef.current && runAudioRef.current && !sfxMuted) {
@@ -344,13 +335,11 @@ export function PlayerController({
         }
         let nextY = y + vy;
 
-        // Combine grass and text platforms
         const allPlatforms = [...platforms, ...textPlatforms];
 
-        // Platform collision detection
         let landedOnPlatform = false;
         let currentLandedPlatform = null;
-        let currentlyStandingOnLetters = new Set(); // Track which letters player is currently on
+        let currentlyStandingOnLetters = new Set();
 
         if (vy > 0) {
           for (const platform of allPlatforms) {
@@ -380,7 +369,6 @@ export function PlayerController({
               ) {
                 setLetterBounces((prev) => ({ ...prev, [platform.index]: 25 }));
                 lastLandedPlatform.current = platform.index;
-                // Play bump sound when letter starts bouncing
                 if (bumpAudioRef.current && !sfxMuted) {
                   bumpAudioRef.current.currentTime = 0;
                   bumpAudioRef.current
@@ -397,10 +385,8 @@ export function PlayerController({
           }
         }
 
-        // Check for collisions when jumping upward (vy < 0) - hitting bottom of platforms
         if (vy < 0) {
           for (const platform of allPlatforms) {
-            // Skip letter platforms for bottom collision detection
             if (platform.letter) continue;
 
             const playerLeft = nextX;
@@ -440,20 +426,17 @@ export function PlayerController({
           const platformTop = platform.y;
           const platformBottom = platform.y + platform.height;
 
-          // Check if player overlaps with platform horizontally and vertically
           if (
             playerRight > platformLeft &&
             playerLeft < platformRight &&
             playerBottom > platformTop &&
             playerTop < platformBottom
           ) {
-            // Determine which side the collision is on
             const leftOverlap = playerRight - platformLeft;
             const rightOverlap = platformRight - playerLeft;
             const topOverlap = playerBottom - platformTop;
             const bottomOverlap = platformBottom - playerTop;
 
-            // Find the smallest overlap to determine collision side
             const overlaps = [
               { side: "left", value: leftOverlap },
               { side: "right", value: rightOverlap },
@@ -465,7 +448,6 @@ export function PlayerController({
               current.value < min.value ? current : min
             );
 
-            // Handle collision based on which side has the smallest overlap
             if (smallestOverlap.side === "left") {
               nextX = platformLeft - PLAYER_WIDTH;
             } else if (smallestOverlap.side === "right") {
@@ -480,7 +462,6 @@ export function PlayerController({
           }
         }
 
-        // Also check if player is standing on any text platforms (not just landing on them)
         for (const platform of textPlatforms) {
           const playerLeft = nextX;
           const playerRight = nextX + PLAYER_WIDTH;
@@ -490,18 +471,16 @@ export function PlayerController({
           const platformTop = platform.y;
           const platformBottom = platform.y + platform.height;
 
-          // Check if player is currently standing on this letter platform
           if (
             playerRight > platformLeft &&
             playerLeft < platformRight &&
             playerBottom >= platformTop &&
-            playerBottom <= platformBottom + 5 // Small tolerance
+            playerBottom <= platformBottom + 5
           ) {
             currentlyStandingOnLetters.add(platform.index);
           }
         }
 
-        // Stop bouncing for letters the player is no longer standing on
         setLetterBounces((prev) => {
           const newBounces = { ...prev };
           Object.keys(newBounces).forEach((index) => {
@@ -510,13 +489,12 @@ export function PlayerController({
               !currentlyStandingOnLetters.has(indexNum) &&
               newBounces[index] > 0
             ) {
-              newBounces[index] = 0; // Stop bouncing immediately
+              newBounces[index] = 0;
             }
           });
           return newBounces;
         });
 
-        // Reset lastLandedPlatform if not on a platform
         if (!landedOnPlatform) {
           lastLandedPlatform.current = null;
         } else if (currentLandedPlatform !== lastLandedPlatform.current) {
@@ -527,7 +505,7 @@ export function PlayerController({
           nextY = GROUND_Y - PLAYER_HEIGHT;
           vy = 0;
           nextOnGround = true;
-          lastLandedPlatform.current = null; // Reset when landing on ground
+          lastLandedPlatform.current = null;
         } else if (!landedOnPlatform) {
           nextOnGround = false;
         }
@@ -715,9 +693,10 @@ export function PlayerController({
                 `,
                 fontFamily: "PixelGameFont, monospace",
                 userSelect: "none",
+                opacity: textBlink ? 1 : 0,
               }}
             >
-              [ Explore Me ]
+              [ Explore me ]
             </span>
           </div>
         </>

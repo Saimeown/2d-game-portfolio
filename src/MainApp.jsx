@@ -6,7 +6,7 @@ import { PlayerMovementProvider } from './PlayerMovementContext.jsx';
 
 export default function MainApp() {
   const [muted, setMuted] = useState(false);
-  const [sfxMuted, setSfxMuted] = useState(false); // Sound effects mute state
+  const [sfxMuted, setSfxMuted] = useState(false);
   const musicRef = useRef(null);
   const [playerY, setPlayerY] = useState(null);
   const wasSfxMuted = useRef(sfxMuted);

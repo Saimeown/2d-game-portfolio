@@ -8,13 +8,11 @@ import { VIRTUAL_WIDTH, VIRTUAL_HEIGHT } from '../constants/gameConstants.js';
 import '../index.css';
 
 function MainWithPlatforms() {
-  // Use virtual coordinates directly
   const STANDEE_X = 1500;
-  const STANDEE_Y = 800 - 120; // 680
+  const STANDEE_Y = 800 - 120;
   const STORE_X = 100;
   const STORE_Y = 800 - 120;
 
-  // Define platforms using virtual coordinates
   const grassPlatforms = [
     {
       x: STANDEE_X - 970,
@@ -52,11 +50,16 @@ function MainWithPlatforms() {
       width: 180,
       height: 15,
     },
+    {
+      x: STANDEE_X - 1140,
+      y: STANDEE_Y - 490,
+      width: 25,
+      height: 15,
+    },
   ];
 
   return (
     <>
-      {/* Background Video */}
       <video
         autoPlay
         loop
@@ -75,7 +78,6 @@ function MainWithPlatforms() {
         src="src/assets/background-image.mp4"
       />
 
-      {/* Store image */}
       <img
         src="public/assets/STORE.png"
         alt="Store"
@@ -92,7 +94,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Standee image */}
       <img
         src="/assets/standee-rightArrow.png"
         alt="Standee"
@@ -109,7 +110,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Hotel Image */}
       <img
         src="/assets/HOTEL.png"
         alt="Hotel"
@@ -126,7 +126,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Billboard image */}
       <img
         src="/assets/BILLBOARD.png"
         alt="Billboard"
@@ -143,7 +142,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* School image */}
       <img
         src="/assets/SCHOOL.png"
         alt="School"
@@ -160,7 +158,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Cart image */}
       <img
         src="/assets/CART.png"
         alt="Cart"
@@ -177,7 +174,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Building image */}
       <img
         src="/assets/BUILDING.png"
         alt="Building"
@@ -194,7 +190,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Fence images */}
       <img
         src="/assets/FENCE.png"
         alt="Fence"
@@ -301,7 +296,6 @@ function MainWithPlatforms() {
         draggable={false}
       />
 
-      {/* Brick platforms */}
       <img
         src="/assets/SHORT-BRICK.png"
         alt="Brick"
@@ -378,6 +372,21 @@ function MainWithPlatforms() {
         draggable={false}
       />
       <img
+        src="/assets/SHORT-BRICK.png"
+        alt="Brick"
+        style={{
+          position: 'absolute',
+          left: 335,
+          top: STANDEE_Y - 490,
+          width: 80,
+          height: 33,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+      <img
         src="/assets/LONG-BRICK.png"
         alt="Brick"
         style={{
@@ -397,8 +406,8 @@ function MainWithPlatforms() {
         alt="Exclamation"
         style={{
           position: 'absolute',
-          left: 150,
-          top: STANDEE_Y - 460,
+          left: 155,
+          top: STANDEE_Y - 463,
           width: 63,
           height: 63,
           zIndex: 0,
@@ -413,9 +422,9 @@ function MainWithPlatforms() {
         style={{
           position: 'absolute',
           left: 70,
-          top: STANDEE_Y - 510,
-          width: 75,
-          height: 113,
+          top: STANDEE_Y - 500,
+          width: 68,
+          height: 100,
           zIndex: 0,
           pointerEvents: 'none',
           userSelect: 'none',
