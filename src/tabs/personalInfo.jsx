@@ -15,6 +15,12 @@ export default function PersonalInfo() {
       width: 300,
       height: 15,
     },
+    {
+      x: STANDEE_X - 1450,
+      y: STANDEE_Y - 400,
+      width: 180,
+      height: 15,
+    },
   ];
 
   return (
@@ -54,7 +60,39 @@ export default function PersonalInfo() {
         }}
         draggable={false}
       />
+
+      <img
+        src="/assets/LONG-BRICK.png"
+        alt="Brick"
+        style={{
+          position: 'absolute',
+          left: 40,
+          top: STANDEE_Y - 400,
+          width: 200,
+          height: 33,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
       
+      <img
+        src="/assets/platforms/SHORT-STONE.png"
+        alt="Brick"
+        style={{
+          position: 'absolute',
+          left: STANDEE_X - 762,
+          top: STANDEE_Y - 80,
+          width: 80,
+          height: 33,
+          zIndex: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+        draggable={false}
+      />
+
       <div
         style={{
           position: 'absolute',
