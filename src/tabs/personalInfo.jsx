@@ -1,12 +1,48 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { GameContainer } from '../components/GameContainer.jsx';
 import { Header } from '../components/Header.jsx';
 import { PlayerController } from '../components/PlayerController.jsx';
+import TextType from '../components/TextType.jsx';
+import { Coin } from '../components/Coin.jsx';
+import { useCoin } from '../CoinContext.jsx';
 import { VIRTUAL_WIDTH, VIRTUAL_HEIGHT } from '../constants/gameConstants.js';
 
 export default function PersonalInfo() {
+  const { touchedExclamation, touchExclamation, collectCoin, isCoinCollected } = useCoin();
+  const [hasTounchedExclamation, setHasTouchedExclamation] = useState(false);
+  const coinCollectionRef = useRef(false);
+  
   const STANDEE_X = 1500;
   const STANDEE_Y = 800 - 120;
+  const COIN_ID = 'personalInfo-coin-1';
+  
+  const coinCollected = isCoinCollected(COIN_ID);
+
+  // Collision detection for coin and exclamation standee
+  const handleSpriteCollision = (spriteX, spriteY) => {
+    const SPRITE_WIDTH = 80;
+    const SPRITE_HEIGHT = 80;
+    
+    // Check coin collision (first standee position) - only if not already collected globally
+    if (!coinCollected && !coinCollectionRef.current &&
+        spriteX + SPRITE_WIDTH > 70 && 
+        spriteX < 70 + 63 && 
+        spriteY + SPRITE_HEIGHT > STANDEE_Y - 463 && 
+        spriteY < STANDEE_Y - 463 + 63) {
+      coinCollectionRef.current = true;
+      collectCoin(COIN_ID);
+    }
+    
+    // Check exclamation standee collision (second standee position)
+    if (!hasTounchedExclamation &&
+        spriteX + SPRITE_WIDTH > 155 && 
+        spriteX < 155 + 63 && 
+        spriteY + SPRITE_HEIGHT > STANDEE_Y - 463 && 
+        spriteY < STANDEE_Y - 463 + 63) {
+      setHasTouchedExclamation(true);
+      touchExclamation();
+    }
+  };
 
   const grassPlatforms = [
     {
@@ -76,16 +112,23 @@ export default function PersonalInfo() {
         }}
         draggable={false}
       />
-      
+
+      <Coin 
+        x={70}
+        y={STANDEE_Y - 463}
+        collected={coinCollected}
+        onAnimationEnd={() => {}}
+      />
+
       <img
-        src="/assets/platforms/SHORT-STONE.png"
-        alt="Brick"
+        src="/assets/standee-exclamation.png"
+        alt="Exclamation"
         style={{
           position: 'absolute',
-          left: STANDEE_X - 762,
-          top: STANDEE_Y - 80,
-          width: 80,
-          height: 33,
+          left: 155,
+          top: STANDEE_Y - 463,
+          width: 63,
+          height: 63,
           zIndex: 0,
           pointerEvents: 'none',
           userSelect: 'none',
@@ -93,6 +136,51 @@ export default function PersonalInfo() {
         draggable={false}
       />
 
+      {/* Typing Text Effect - Upper Part - Always show bubble, dots first, then text when standee touched */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '170px',
+          top: 80,
+          zIndex: 15,
+          textAlign: 'left',
+        }}
+      >
+        {!touchedExclamation ? (
+          <TextType 
+            text={["..."]}
+            typingSpeed={500}
+            pauseDuration={1000}
+            showCursor={false}
+            cursorCharacter=""
+            initialDelay={1000}
+            textColors={['#FFF']}
+            className="game-text"
+            style={{
+              fontSize: '32px',
+              fontWeight: 'bold',
+              fontFamily: 'PixelGameFont, monospace',
+            }}
+          />
+        ) : (
+          <TextType 
+            text={["Collect coins to receive an amazing reward <3"]}
+            typingSpeed={75}
+            pauseDuration={1500}
+            showCursor={true}
+            cursorCharacter="|"
+            initialDelay={500}
+            textColors={['#FFF']}
+            className="game-text"
+            style={{
+              fontSize: '28px',
+              fontWeight: 'bold',
+              fontFamily: 'PixelGameFont, monospace',
+            }}
+          />
+        )}
+      </div>
+    
       <div
         style={{
           position: 'absolute',
@@ -124,7 +212,6 @@ export default function PersonalInfo() {
             marginBottom: '20px',
           }}
         >
-          🚧🚧🚧
         </div>
         <div
           style={{
@@ -155,6 +242,7 @@ export default function PersonalInfo() {
         fallOnLoad={false}
         startAtLeft={true}
         platforms={grassPlatforms}
+        onSpriteMove={handleSpriteCollision}
       />
     </GameContainer>
   );

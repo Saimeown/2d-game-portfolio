@@ -1,13 +1,49 @@
 import React, { useContext } from 'react';
 import MusicContext, { SoundEffectsContext } from '../MusicContext.js';
 import PlayerMovementContext from '../PlayerMovementContext.jsx';
+import { useCoin } from '../CoinContext.jsx';
 
 export function Header({ player, jumpPressed, textDrop, landedOnce }) {
   const { muted, toggleMute } = useContext(MusicContext);
   const { muted: sfxMuted, toggleMute: toggleSfxMute } = useContext(SoundEffectsContext);
   const { isMoving } = useContext(PlayerMovementContext);
+  const { coinCount } = useCoin();
   return (
     <>
+      <div
+        style={{
+          position: 'absolute',
+          top: 30,
+          left: 30,
+          zIndex: 100,
+          background: 'rgba(255,255,255,1)',
+          borderRadius: '25px',
+          padding: '15px 25px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '2px solid #000',
+          fontFamily: 'PixelGameFont, monospace',
+          fontSize: 24,
+          fontWeight: 'bold',
+          color: '#333',
+          textShadow: '1px 1px 0 rgba(0,0,0,0.3)',
+          pointerEvents: 'none',
+        }}
+      >
+        <img
+          src="/assets/coin/frame_1.png"
+          alt="Coin"
+          style={{ 
+            width: 30, 
+            height: 30, 
+            marginRight: 10,
+            objectFit: 'contain' 
+          }}
+          draggable={false}
+        />
+        {coinCount}
+      </div>
       <button
         onClick={(e) => {
           toggleMute();

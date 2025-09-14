@@ -1,0 +1,135 @@
+.text-type {
+  display: inline-block;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+.text-type__cursor {
+  margin-left: 0.25rem;
+  display: inline-block;
+  opacity: 1;
+  color: #333;
+  font-weight: bold;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0px 2px 0 #000,
+    2px 0px 0 #000,
+    0px -2px 0 #000,
+    -2px 0px 0 #000;
+}
+
+.text-type__cursor--hidden {
+  display: none;
+}
+
+.text-type__content {
+  font-family: 'PixelGameFont', monospace;
+  color: #333;
+  font-weight: bold;
+  font-size: inherit;
+  text-align: center;
+  line-height: 1.2;
+  word-wrap: break-word;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0px 2px 0 #000,
+    2px 0px 0 #000,
+    0px -2px 0 #000,
+    -2px 0px 0 #000;
+}
+
+/* Game-style text cloud */
+.text-cloud {
+  position: relative;
+  display: inline-block;
+  z-index: 20;
+}
+
+.cloud-bubble {
+  background: rgba(255, 255, 255, 0.98);
+  border: 3px solid #000;
+  border-radius: 25px;
+  padding: 20px 30px;
+  position: relative;
+  min-width: 70px;
+  min-height: 60px;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transform-origin: left center;
+}
+
+.cloud-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 35px;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 20px solid #000;
+  z-index: 1;
+}
+
+.cloud-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 38px;
+  width: 0;
+  height: 0;
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+  border-top: 17px solid rgba(255, 255, 255, 0.98);
+  z-index: 2;
+}
+
+.cloud-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cloud-dots span {
+  font-size: 32px;
+  color: #333;
+  animation: dotPulse 1.2s ease-in-out infinite;
+  font-family: 'PixelGameFont', monospace;
+  font-weight: bold;
+}
+
+.cloud-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.cloud-dots span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.cloud-dots span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes cloudBounce {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-5px); }
+}
+
+@keyframes dotPulse {
+  0%, 60%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  30% { 
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}

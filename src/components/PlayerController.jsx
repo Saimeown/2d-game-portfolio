@@ -62,7 +62,7 @@ export function PlayerController({
   const isInitialRender = useRef(
     !fallOnLoad && rightRoute && location.pathname === rightRoute
   );
-  const lastLandedPlatform = useRef(null); // Track last landed platform index
+  const lastLandedPlatform = useRef(null); 
 
   let initialX;
   if (startAtLeft) {
@@ -76,7 +76,7 @@ export function PlayerController({
   } else if (fallOnLoad && leftRoute && location.pathname === leftRoute) {
     initialX = 0;
   } else {
-    initialX = GAME_WIDTH / 2 - PLAYER_WIDTH / 2; // Approx 352.5
+    initialX = GAME_WIDTH / 2 - PLAYER_WIDTH / 2; 
   }
 
   const initialY = (() => {
@@ -164,7 +164,7 @@ export function PlayerController({
     };
   }, []);
 
-  const textString = "START YOUR QUEST >>>";
+  const textString = "TO THE NEXT SCENE >>>";
   const fontSize = 120;
   const letterSpacing = 5;
   const spaceWidth = fontSize * 0.3;
@@ -412,9 +412,7 @@ export function PlayerController({
           }
         }
 
-        // Check for side collisions (left and right sides of platforms)
         for (const platform of allPlatforms) {
-          // Skip letter platforms for side collision detection
           if (platform.letter) continue;
 
           const playerLeft = nextX;

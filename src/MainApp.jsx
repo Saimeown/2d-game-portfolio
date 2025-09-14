@@ -3,6 +3,7 @@ import App from './tabs/App.jsx';
 import MusicContext, { SoundEffectsContext } from './MusicContext.js';
 import PlayerPositionContext from './PlayerPositionContext.js';
 import { PlayerMovementProvider } from './PlayerMovementContext.jsx';
+import { CoinProvider } from './CoinContext.jsx';
 
 export default function MainApp() {
   const [muted, setMuted] = useState(false);
@@ -43,21 +44,23 @@ export default function MainApp() {
   };
 
   return (
-    <MusicContext.Provider value={{ muted, toggleMute }}>
-      <SoundEffectsContext.Provider value={{ muted: sfxMuted, toggleMute: toggleSfxMute }}>
-        <PlayerPositionContext.Provider value={{ y: playerY, setY: setPlayerY }}>
-          <PlayerMovementProvider>
-            <audio
-              ref={musicRef}
-              src="/assets/background-music.mp3"
-              loop
-              preload="auto"
-              style={{ display: 'none' }}
-            />
-            <App />
-          </PlayerMovementProvider>
-        </PlayerPositionContext.Provider>
-      </SoundEffectsContext.Provider>
-    </MusicContext.Provider>
+    <CoinProvider>
+      <MusicContext.Provider value={{ muted, toggleMute }}>
+        <SoundEffectsContext.Provider value={{ muted: sfxMuted, toggleMute: toggleSfxMute }}>
+          <PlayerPositionContext.Provider value={{ y: playerY, setY: setPlayerY }}>
+            <PlayerMovementProvider>
+              <audio
+                ref={musicRef}
+                src="/assets/background-music.mp3"
+                loop
+                preload="auto"
+                style={{ display: 'none' }}
+              />
+              <App />
+            </PlayerMovementProvider>
+          </PlayerPositionContext.Provider>
+        </SoundEffectsContext.Provider>
+      </MusicContext.Provider>
+    </CoinProvider>
   );
 }
