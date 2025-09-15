@@ -1,31 +1,31 @@
-# 🎮 Interactive 2D Portfolio Game
+# Interactive 2D Portfolio Game
 
 ![Demo](./2d.gif)
 
 An immersive, pixel-art styled portfolio website built as an interactive 2D platformer game using React and Vite. Experience a unique blend of gaming and professional presentation where visitors can explore your portfolio by controlling a character through different scenes.
 
-## ✨ Features
+## Features
 
-### 🎯 Core Gameplay
+### Core Gameplay
 - **Character Control**: WASD/Arrow keys for movement and spacebar for jumping
 - **Physics Engine**: Realistic gravity, collision detection, and platform mechanics
 - **Multi-Scene Navigation**: Seamlessly transition between different portfolio sections
 - **Interactive Elements**: Collectible coins, text bubbles, and environmental storytelling
 
-### 🎨 Visual & Audio Experience
+### Visual & Audio Experience
 - **Pixel Art Aesthetics**: Custom sprite animations for idle, running, and jumping states
 - **Dynamic Backgrounds**: Video backgrounds for immersive scenes
 - **Sound Design**: Background music, sound effects for actions (jump, run, coin collection)
 - **Custom UI Elements**: Pixel-perfect fonts, animated text, and game-style interfaces
 - **Responsive Design**: Scales beautifully across different screen sizes
 
-### 🎪 Interactive Portfolio Elements
+### Interactive Portfolio Elements
 - **Coin Collection System**: Global coin counter with persistent state
 - **Text Bubble Conversations**: Character interactions trigger informational content
 - **Animated Typography**: Typewriter effects and bouncing text animations
 - **Scene-Based Storytelling**: Each area represents different portfolio sections
 
-### 🔧 Technical Features
+### Technical Features
 - **React 19**: Latest React features with strict mode
 - **React Router**: Seamless scene transitions
 - **Context Management**: Global state for coins, music, and player position
@@ -33,7 +33,7 @@ An immersive, pixel-art styled portfolio website built as an interactive 2D plat
 - **Asset Optimization**: Efficient loading of sprites, sounds, and images
 - **Performance Optimized**: Smooth 60fps gameplay with requestAnimationFrame
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 16+ 
@@ -57,7 +57,7 @@ npm run dev
 
 Open your browser and navigate to `http://localhost:5173` to start exploring!
 
-## 🎮 How to Play
+## How to Navigate
 
 ### Controls
 - **Move Left**: `A` or `←` (Left Arrow)
@@ -72,7 +72,7 @@ Open your browser and navigate to `http://localhost:5173` to start exploring!
 - Jump on letter platforms for interactive text effects
 - Explore all areas to discover hidden content
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 my-portfolio/
@@ -98,7 +98,7 @@ my-portfolio/
 └── README.md
 ```
 
-## 🎯 Game Scenes
+## Game Scenes
 
 ### Main Scene (`/`)
 - Starting area with platformer challenges
@@ -110,7 +110,7 @@ my-portfolio/
 - Coin collection challenges
 - Text bubble conversations
 
-## 🛠️ Technologies Used
+## 🛠Technologies Used
 
 - **Frontend**: React 19, React Router DOM
 - **Build Tool**: Vite 7.0
@@ -120,14 +120,14 @@ my-portfolio/
 - **State Management**: React Context API
 - **Development**: ESLint, Hot Module Replacement
 
-## 🎨 Asset Credits
+## Asset Credits
 
 - **Pixel Font**: Pixel Game font family
 - **Character Sprites**: Custom pixel art animations
 - **Sound Effects**: Game-appropriate audio clips
 - **Background Music**: Ambient gaming soundtrack
 
-## 📱 Browser Compatibility
+## Browser Compatibility
 
 - ✅ Chrome 90+
 - ✅ Firefox 88+
